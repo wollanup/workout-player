@@ -2,15 +2,26 @@
   "name": "workout-player",
   "private": true,
   "version": "0.1.0",
+  "description": "Lecteur musical pour séances de sport : morceaux minutés, pauses et décomptes bipés.",
+  "license": "MIT",
+  "homepage": "https://app.workout.stemux.fr",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wollanup/workout-player.git"
+  },
   "type": "module",
   "scripts": {
+    "predev": "node scripts/licenses.mjs",
     "dev": "vite",
+    "predev:mobile": "node scripts/licenses.mjs",
     "dev:mobile": "vite --host --mode mobile",
+    "prebuild": "node scripts/licenses.mjs",
     "build": "vite build",
     "preview": "vite preview --host --mode mobile",
     "test": "vitest run",
     "test:watch": "vitest",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "licenses": "node scripts/licenses.mjs"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

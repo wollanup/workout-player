@@ -1,71 +1,104 @@
-# Workout Player (POC)
+<p align="center">
+  <img src="public/icon.svg" width="96" alt="">
+</p>
 
-Lecteur musical pour séances de sport : enchaîne des morceaux (YouTube / YT Music ou MP3 locaux)
-pendant une durée fixe, avec pauses, décompte bipé (2 noires + 4 croches, 300 Hz), fondu de fin et départ à un timestamp.
+<h1 align="center">Workout Player</h1>
 
-- Durées : champ compact ; au clic, modale avec presets (1, 2, 3, 5 min, morceau entier) et deux roues à faire défiler (minutes | secondes par 10 s).
-- Analyse de chaque morceau : durée réelle et libellé « Artiste - Titre » (tags ID3 pour les fichiers,
-  lecteur YouTube + oEmbed pour les vidéos) ; alerte si l'étape dépasse la fin du morceau, avec ajustement en un clic.
-- Préchargement du morceau suivant pendant les pauses.
-- Sauvegarde automatique à chaque modification (pas de bouton Enregistrer) ; la validation se fait au lancement.
-- Décompte départ, bips avant fin et fondu : roue de secondes (0 = « Non ») ; bouton pour écouter les bips.
-- Mode application : barre fixe (logo, nom) et menu ⋮ avec Thème (couleur d'accent, clair / sombre / système) et Aide.
+<p align="center">
+  <b>Ta musique, ton rythme, ta séance.</b><br>
+  Le lecteur qui enchaîne tes morceaux préférés au chrono près, avec pauses et bips de décompte.
+</p>
 
-## Démarrage
+<p align="center">
+  <a href="https://app.workout.stemux.fr"><b>Ouvrir l'application</b></a>
+  ·
+  <a href="#installer-sur-ton-téléphone">L'installer sur ton téléphone</a>
+  ·
+  <a href="https://github.com/wollanup/workout-player/actions/workflows/deploy.yml"><img src="https://github.com/wollanup/workout-player/actions/workflows/deploy.yml/badge.svg" alt="Déploiement" align="center"></a>
+</p>
 
-```bash
-npm install
-npm run dev          # http://localhost:5173
-npm run dev:mobile   # HTTPS auto-signé exposé sur le LAN -> https://<IP-du-PC>:5173 depuis le téléphone
-npm test             # Vitest
-npm run lint         # ESLint
-npm run build        # build statique dans dist/ (npm run preview pour le servir en HTTPS sur le LAN)
-```
+---
 
-Sur mobile : accepter l’avertissement de certificat. HTTPS est nécessaire pour le maintien de l’écran
-allumé (Wake Lock) et le service worker. PC et téléphone doivent être sur le même réseau (port 5173 ouvert).
+Tu fais du HIIT, du fractionné, du gainage ou du circuit training ? Tu connais le problème : l'œil rivé sur
+le chrono, le téléphone à déverrouiller entre deux séries, la playlist qui ne tombe jamais au bon moment.
 
-## YouTube
+**Workout Player fait le chrono à ta place.** Tu construis ta séance une fois (« 3 min de ce morceau,
+20 s de pause, puis 5 min de celui-là… »), tu appuies sur Lancer, et tu n'as plus qu'à transpirer.
 
-- Lecteur officiel (IFrame API) : être connecté à YouTube dans le navigateur pour le Premium (sans pub).
-- Erreur 153 = pas de Referer envoyé : ne pas ouvrir `index.html` en `file://`, passer par le serveur.
-- Playlists : publiques ou non répertoriées uniquement ; certains clips interdisent la lecture intégrée (erreurs 101/150).
-- Lecture YouTube = écran allumé obligatoire. Les MP3 locaux fonctionnent écran éteint et hors ligne.
+<p align="center">
+  <img src="docs/screenshots/sessions.png" width="200" alt="Liste des séances">
+  <img src="docs/screenshots/editor.png" width="200" alt="Construction d'une séance">
+  <img src="docs/screenshots/duration-picker.png" width="200" alt="Choix d'une durée">
+  <img src="docs/screenshots/player.png" width="200" alt="Séance en cours">
+</p>
 
-## Déploiement (GitHub Pages)
+## Ce qu'il sait faire
 
-`.github/workflows/deploy.yml` : lint + tests + build à chaque push / PR ; sur `main`, publication sur GitHub Pages
-à l'adresse https://app.workout.stemux.fr (`public/CNAME`).
+- **Tes morceaux, découpés au chrono.** Chaque étape joue un morceau pendant la durée choisie, à partir du
+  passage que tu veux (le refrain qui envoie, pas l'intro de 40 secondes), avec un fondu en fin d'étape.
+- **Pauses et décomptes.** Un décompte avant le départ, des pauses entre les exercices et des bips
+  rythmés avant chaque changement : tu sais que ça tourne sans regarder l'écran.
+- **YouTube et YouTube Music.** Colle un lien de vidéo ou importe une playlist entière. Avec ton
+  abonnement Premium, pas de pub au milieu de la dernière série.
+- **Tes propres fichiers.** Ajoute tes MP3 : ils restent sur le téléphone et fonctionnent hors ligne,
+  même écran éteint.
+- **Rapide à construire.** Durées en un geste (presets 1, 2, 3, 5 min ou roues façon réveil),
+  titre « Artiste - Titre » retrouvé automatiquement, alerte si le morceau est plus court que l'étape.
+- **Toujours sous les yeux.** Durée totale de la séance, temps restant, morceau suivant, gros boutons
+  faciles à viser avec les mains moites.
+- **Rien à enregistrer.** Chaque modification est sauvegardée automatiquement.
+- **À ton goût.** Thème clair, sombre ou selon le système, et couleur d'accent au choix.
 
-Mise en place (une seule fois) :
+## Exemple
 
-1. DNS `stemux.fr` : enregistrement `CNAME app.workout -> <compte>.github.io.`
-2. Créer le repo et pousser : `gh repo create workout-player --public --source . --push`
-3. Activer Pages via Actions et le domaine :
-   `gh api -X POST repos/<compte>/workout-player/pages -f build_type=workflow`
-   puis `gh api -X PUT repos/<compte>/workout-player/pages -f cname=app.workout.stemux.fr`
-4. Relancer le workflow (`gh workflow run deploy.yml`), puis cocher « Enforce HTTPS » une fois le certificat émis.
+Un HIIT de 14 minutes :
 
-PWA : `public/manifest.webmanifest`, `public/sw.js` (network-first, cache hors ligne), icônes générées depuis
-`public/icon*.svg` par `scripts/icons.mjs`.
+| Étape | Durée |
+|---|---|
+| Décompte de départ | 10 s |
+| Daft Punk - Harder, Better, Faster, Stronger | 3:00 |
+| Pause | 0:20 |
+| The Prodigy - Firestarter | 3:00 |
+| Pause | 0:20 |
+| Queen - Don't Stop Me Now (à partir de 0:30) | 5:00 |
+| Pause | 0:30 |
+| Survivor - Eye of the Tiger | 2:00 |
 
-## Stack
+Tu crées la séance une fois, puis c'est un seul bouton à chaque entraînement.
 
-React 19 + Mantine 9 (UI, modales, notifications) + Tabler Icons (SVG), Vite, Vitest + Testing Library, ESLint.
+## Installer sur ton téléphone
 
-## Architecture
+Workout Player est une application web installable, sans store ni compte :
 
-```
-src/
-  core/        logique pure, sans DOM (temps, parsing YouTube, modèle de séance, plan des bips) — testée
-  player/      WorkoutEngine : machine à états de la séance, indépendante de l'UI — testée
-  media/       adaptateurs : lecteur YouTube, audio local, bips Web Audio
-  services/    stockage (localStorage + IndexedDB pour les fichiers), wake lock
-  app/         singletons runtime (moteur, médias), thème, providers, modales / notifications
-  hooks/       useEngineState (useSyncExternalStore), useSessions
-  components/  écrans React : SessionList, SessionEditor (+ StepCard, PlaylistImport), PlayerScreen
-```
+- **Android (Chrome)** : ouvre [app.workout.stemux.fr](https://app.workout.stemux.fr), menu ⋮ puis
+  « Installer l'application ».
+- **iPhone (Safari)** : ouvre le site, bouton Partager puis « Sur l'écran d'accueil ».
 
-Le moteur et les médias vivent hors de React (ils doivent survivre aux changements d'écran) ;
-les composants s'y abonnent via `useEngineState`. Pas d'`alert()`/`confirm()` : `app/feedback.jsx`.
-Sur mobile, la taille de base (rem) est augmentée de 12,5 % (`src/app.css`), toute l'UI suit.
+Elle s'ouvre ensuite en plein écran comme une vraie app et garde l'écran allumé pendant la séance.
+
+## Bon à savoir
+
+- Pour profiter de YouTube Premium, connecte-toi à YouTube dans le même navigateur.
+- Les playlists doivent être publiques ou non répertoriées (les playlists privées, comme « J'aime »,
+  ne sont pas lisibles par le lecteur intégré). Certains clips interdisent la lecture hors de YouTube :
+  le lecteur le signale et le chrono continue.
+- Avec YouTube, l'écran doit rester allumé (l'app s'en charge). Avec tes fichiers, pas besoin.
+
+## Vie privée
+
+Pas de compte, pas de pub, pas de pistage. Tes séances et tes fichiers restent sur ton appareil.
+Seul le lecteur YouTube communique avec Google quand tu l'utilises.
+Détails dans les [mentions légales](docs/LEGAL.md).
+
+## Contribuer
+
+Idées, bugs, envies : ouvre une [issue](https://github.com/wollanup/workout-player/issues).
+Pour lancer le projet en local et comprendre son architecture, voir la
+[documentation technique](docs/DEVELOPMENT.md).
+
+## Licence
+
+[MIT](LICENSE). Les bibliothèques utilisées et leurs licences sont listées dans
+[THIRD_PARTY_LICENSES.md](THIRD_PARTY_LICENSES.md).
+
+Workout Player n'est pas affilié à YouTube ni à Google.
