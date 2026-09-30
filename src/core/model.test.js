@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import {
-  newSession, newMusic, newPause, totalDuration, stepTitle, buildRunSteps, validateSession, stepsFromPlaylist,
+  newSession, newMusic, newPause, totalDuration, stepTitle, buildRunSteps, validateSession, stepsFromTracks,
 } from './model.js';
 import { beepTimes, beepPlan } from './beeps.js';
 
@@ -27,15 +27,28 @@ describe('model', () => {
 
   it('validateSession', () => {
     expect(validateSession(newSession())).toEqual(['Ajoute au moins une étape.']);
-    const s = { ...newSession(), steps: [newMusic('yt'), newMusic('local', { fileId: 'f' }), newPause(0)] };
-    expect(validateSession(s)).toEqual(['Étape 1 : aucune musique sélectionnée.', 'Étape 3 : durée invalide.']);
+    const s = { ...newSession(), steps: [newMusic('yt'), newMusic('local', { fileId: 'f' }), newPause(0), newMusic('apple'), newMusic('apple', { appleId: '1' })] };
+    expect(validateSession(s)).toEqual([
+      'Étape 1 : aucune musique sélectionnée.', 'Étape 3 : durée invalide.', 'Étape 4 : aucune musique sélectionnée.',
+    ]);
   });
 
-  it('stepsFromPlaylist interleaves pauses', () => {
-    const steps = stepsFromPlaylist(['a', 'b', 'c'], 120, 20);
+  it('stepsFromTracks interleaves pauses', () => {
+    const steps = stepsFromTracks('yt', ['a', 'b', 'c'].map(videoId => ({ videoId })), { duration: 120, pause: 20 });
     expect(steps.map(s => s.type)).toEqual(['music', 'pause', 'music', 'pause', 'music']);
     expect(steps[0]).toMatchObject({ source: 'yt', videoId: 'a', duration: 120 });
-    expect(stepsFromPlaylist(['a', 'b'], 60, 0)).toHaveLength(2);
+    expect(stepsFromTracks('yt', [{ videoId: 'a' }, { videoId: 'b' }], { duration: 60 })).toHaveLength(2);
+  });
+
+  it('stepsFromTracks keeps track info and can use whole tracks', () => {
+    const tracks = [
+      { appleId: '1', label: 'A - B', trackDuration: 200.6, artwork: 'x' },
+      { appleId: '2', label: 'C - D' },
+    ];
+    const [a, b] = stepsFromTracks('apple', tracks, { duration: 90, wholeTrack: true });
+    expect(a).toMatchObject({ source: 'apple', appleId: '1', label: 'A - B', trackDuration: 200.6, duration: 200 });
+    expect(a).not.toHaveProperty('artwork');
+    expect(b).toMatchObject({ appleId: '2', duration: 90 });
   });
 });
 

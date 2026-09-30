@@ -3,7 +3,7 @@ import {
   ActionIcon, Button, FileButton, Group, Paper, SimpleGrid, Stack, Text, TextInput,
 } from '@mantine/core';
 import {
-  IconArrowLeft, IconBrandYoutube, IconCloudCheck, IconCloudUp, IconFileMusic, IconPlayerPause, IconPlayerPlayFilled, IconVolume,
+  IconArrowLeft, IconCloudCheck, IconCloudUp, IconPlayerPause, IconPlayerPlayFilled, IconVolume,
 } from '@tabler/icons-react';
 import { StepCard } from './StepCard.jsx';
 import { SecondsInput } from './SecondsInput.jsx';
@@ -15,11 +15,15 @@ import { FileStore } from '../services/storage.js';
 import { plural } from '../core/plural.js';
 import { localTrackInfo, youTubeTrackInfo } from '../services/trackInfo.js';
 import { notifyError } from '../app/feedback.jsx';
+import { SOURCE_ICONS } from '../app/sourceIcons.js';
+import { PLAYLIST_SOURCES, sourceMeta } from '../core/sources.js';
+import { useSources } from '../hooks/useSources.js';
 
 const AUTOSAVE_MS = 400;
 
 /** Edits a session; every change is saved automatically (debounced, flushed when leaving). */
-export function SessionEditor({ session, youtube, beeper, onSave, onClose, onPlay }) {
+export function SessionEditor({ session, youtube, apple, beeper, onSave, onClose, onPlay }) {
+  const { active } = useSources(apple);
   const [draft, setDraft] = useState(() => structuredClone(session));
   const [dirty, setDirty] = useState(false);
   const [saved, setSaved] = useState(true);
@@ -90,6 +94,7 @@ export function SessionEditor({ session, youtube, beeper, onSave, onClose, onPla
         if (s.type !== 'music' || s.trackDuration > 0) continue;
         const info = await withAnalysis(s.id, async () => {
           if (s.source === 'yt') return s.videoId ? youTubeTrackInfo(youtube, s.videoId) : null;
+          if (s.source === 'apple') return s.appleId && apple?.configured ? apple.song(s.appleId).catch(() => null) : null;
           const file = s.fileId && await FileStore.get(s.fileId).catch(() => null);
           return file ? localTrackInfo(file) : null;
         });
@@ -174,6 +179,7 @@ export function SessionEditor({ session, youtube, beeper, onSave, onClose, onPla
           isFirst={i === 0}
           isLast={i === draft.steps.length - 1}
           analyzing={analyzing.has(s.id)}
+          apple={apple}
           onChange={patch => updateStep(s.id, patch)}
           onVideo={v => changeVideo(s, v)}
           onMove={dir => moveStep(i, dir)}
@@ -182,17 +188,25 @@ export function SessionEditor({ session, youtube, beeper, onSave, onClose, onPla
         />
       ))}
 
-      <SimpleGrid cols={{ base: 1, xs: 3 }} spacing="xs">
-        <Button variant="light" color="red" leftSection={<IconBrandYoutube size={20} />}
-          onClick={() => addSteps([newMusic('yt')])}>YouTube</Button>
-        <FileButton accept="audio/*" multiple onChange={addFiles}>
-          {props => <Button variant="light" color="blue" leftSection={<IconFileMusic size={20} />} {...props}>Fichier</Button>}
-        </FileButton>
+      <SimpleGrid cols={{ base: (active.length + 1) % 2 ? 1 : 2, xs: active.length + 1 }} spacing="xs">
+        {active.map(id => {
+          const { label, color } = sourceMeta(id);
+          const Icon = SOURCE_ICONS[id];
+          const props = { variant: 'light', color, leftSection: <Icon size={20} /> };
+          return id === 'local' ? (
+            <FileButton key={id} accept="audio/*" multiple onChange={addFiles}>
+              {p => <Button {...props} {...p}>{label}</Button>}
+            </FileButton>
+          ) : (
+            <Button key={id} {...props} onClick={() => addSteps([newMusic(id)])}>{label}</Button>
+          );
+        })}
         <Button variant="light" color="orange" leftSection={<IconPlayerPause size={20} />}
           onClick={() => addSteps([newPause()])}>Pause</Button>
       </SimpleGrid>
 
-      <PlaylistImport youtube={youtube} onAdd={addSteps} onUpdate={updateStep} />
+      <PlaylistImport providers={active.filter(id => PLAYLIST_SOURCES.includes(id))}
+        youtube={youtube} apple={apple} onAdd={addSteps} onUpdate={updateStep} />
     </Stack>
   );
 }

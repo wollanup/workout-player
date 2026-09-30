@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi, afterEach } from 'vitest';
-import { cleanup, render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { cleanup, render, screen, fireEvent, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Providers } from '../app/Providers.jsx';
 import { SessionEditor } from './SessionEditor.jsx';
@@ -16,7 +16,7 @@ const renderEditor = (session = newSession(), props = {}) => {
   return { onSave, onClose };
 };
 
-afterEach(cleanup);
+afterEach(() => { cleanup(); localStorage.clear(); });
 
 describe('SessionEditor', () => {
   it('shows the total duration, updated live', async () => {
@@ -135,5 +135,62 @@ describe('SessionEditor', () => {
     renderEditor(session, { onPlay });
     await userEvent.click(screen.getByRole('button', { name: 'Lancer' }));
     expect(onPlay).toHaveBeenCalledWith(expect.objectContaining({ name: 'Jambes' }));
+  });
+
+  describe('with Apple Music', () => {
+    const track = { appleId: '697195462', label: 'Daft Punk - One More Time', trackDuration: 320, artwork: 'https://x/80x80.jpg' };
+    const makeApple = () => ({
+      configured: true,
+      isAuthorized: () => true,
+      subscribe: () => () => {},
+      search: vi.fn(async () => [track]),
+      song: vi.fn(async () => track),
+      tracks: vi.fn(async () => [track, { ...track, appleId: '2', label: 'B - C', trackDuration: 100 }]),
+      libraryPlaylists: vi.fn(async () => [{ id: 'p.1', name: 'Cardio' }]),
+    });
+
+    it('offers only the enabled sources', async () => {
+      localStorage.setItem('wp.sources', JSON.stringify({ yt: false }));
+      renderEditor(newSession(), { apple: makeApple() });
+      expect(screen.getByRole('button', { name: 'Apple Music' })).toBeInTheDocument();
+      expect(screen.getByRole('textbox', { name: 'Ou lien de playlist / album' })).toBeInTheDocument(); // single provider: no choice step
+      expect(screen.getByRole('button', { name: 'Fichier' })).toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: 'YouTube' })).not.toBeInTheDocument();
+    });
+
+    it('searches a song and mixes it with YouTube steps', async () => {
+      const apple = makeApple();
+      const { onSave } = renderEditor(newSession(), { apple });
+      // First buttons = add a step; the playlist import offers the same providers below.
+      await userEvent.click(screen.getAllByRole('button', { name: 'YouTube' })[0]);
+      await userEvent.click(screen.getAllByRole('button', { name: 'Apple Music' })[0]);
+      await userEvent.type(screen.getByRole('textbox', { name: 'Morceau' }), 'one more time{Enter}');
+      expect(apple.search).toHaveBeenCalledWith('one more time');
+      await userEvent.click(await screen.findByRole('option', { name: /Daft Punk - One More Time/ }));
+      expect(screen.getByDisplayValue('Daft Punk - One More Time')).toBeInTheDocument();
+      expect(screen.getByText('5:20')).toBeInTheDocument(); // track duration badge
+      await waitFor(() => expect(onSave).toHaveBeenCalled());
+      const steps = onSave.mock.lastCall[0].steps;
+      expect(steps.map(s => s.source)).toEqual(['yt', 'apple']);
+      expect(steps[1]).toMatchObject({ appleId: '697195462', trackDuration: 320 });
+      expect(steps[1]).not.toHaveProperty('artwork');
+    });
+
+    it('imports a playlist after choosing the provider', async () => {
+      const apple = makeApple();
+      const { onSave } = renderEditor(newSession(), { apple });
+      expect(screen.queryByRole('textbox', { name: /playlist/i })).not.toBeInTheDocument();
+      await userEvent.click(within(screen.getByRole('group', { name: 'Importer une playlist' })).getByRole('button', { name: 'Apple Music' }));
+      await userEvent.type(screen.getByRole('textbox', { name: 'Ou lien de playlist / album' }), 'https://music.apple.com/fr/album/discovery/697194953');
+      await userEvent.click(screen.getByRole('button', { name: 'Importer' }));
+      expect(apple.tracks).toHaveBeenCalledWith({ storefront: 'fr', albumId: '697194953' });
+      expect(await screen.findByText('2 morceaux ajoutés.')).toBeInTheDocument();
+      await waitFor(() => expect(onSave).toHaveBeenCalled());
+      expect(onSave.mock.lastCall[0].steps.map(s => s.type)).toEqual(['music', 'pause', 'music']);
+
+      await userEvent.click(screen.getByRole('button', { name: 'Changer' }));
+      await userEvent.click(within(screen.getByRole('group', { name: 'Importer une playlist' })).getByRole('button', { name: 'YouTube' }));
+      expect(screen.getByRole('textbox', { name: 'URL de la playlist' })).toBeInTheDocument();
+    });
   });
 });

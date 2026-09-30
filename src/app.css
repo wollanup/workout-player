@@ -100,3 +100,11 @@
   .wheel-box { --wheel-item: 52px; width: 104px; }
   .wheel-item { font-size: 1.75rem; }
 }
+
+.result-row {
+  border-radius: var(--mantine-radius-sm);
+}
+.result-row:hover,
+.result-row:focus-visible {
+  background: var(--mantine-color-default-hover);
+}

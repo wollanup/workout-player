@@ -65,7 +65,7 @@ export class WorkoutEngine {
     this.#lastTs = this.#now();
     this.#beeper?.unlock();
     this.#wakeLock?.acquire();
-    if (steps.some(s => s.source === 'yt')) this.#media.yt?.preload?.();
+    for (const src of new Set(steps.map(s => s.source).filter(Boolean))) this.#media[src]?.preload?.();
     if (this.#autoTick) this.#timer = setInterval(() => this.tick(), this.#tickMs);
     this.#goTo(0);
   }

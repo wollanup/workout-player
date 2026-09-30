@@ -5,8 +5,10 @@ export function HelpContent() {
   return (
     <Stack gap="md">
       <List size="sm" spacing="xs">
-        <List.Item><b>YouTube</b> : colle l’URL d’une vidéo (youtube.com, music.youtube.com, youtu.be). Connecte-toi à YouTube dans ce navigateur pour profiter de Premium (sans pub).</List.Item>
-        <List.Item><b>Playlist</b> : publique ou non répertoriée uniquement (les playlists privées, comme « J’aime », ne sont pas lisibles par le lecteur intégré).</List.Item>
+        <List.Item><b>YouTube</b> : colle l’URL d’une vidéo (youtube.com, music.youtube.com, youtu.be). Les publicités dépendent de ton abonnement YouTube / YouTube Music : aucune avec Premium (connecte-toi à YouTube dans ce navigateur), sinon YouTube peut en insérer.</List.Item>
+        <List.Item><b>Apple Music</b> : colle un lien ou cherche un morceau. Abonnement Apple Music requis : connecte ton compte dans Menu &gt; Sources.</List.Item>
+        <List.Item><b>Playlist</b> : choisis d’abord le fournisseur. YouTube : publique ou non répertoriée uniquement (les playlists privées, comme « J’aime », ne sont pas lisibles). Apple Music : lien de playlist ou d’album, ou tes playlists une fois connecté.</List.Item>
+        <List.Item><b>Sources</b> : Menu &gt; Sources pour choisir celles proposées dans l’éditeur. Une séance peut les mélanger.</List.Item>
         <List.Item>Certains clips interdisent la lecture intégrée : le lecteur l’indique et le temps continue.</List.Item>
         <List.Item><b>Fichier local</b> : copié dans le stockage du navigateur (hors ligne, écran éteint).</List.Item>
         <List.Item><b>Sauvegarde</b> : automatique à chaque modification.</List.Item>

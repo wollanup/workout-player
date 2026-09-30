@@ -32,14 +32,27 @@ le chrono, le téléphone à déverrouiller entre deux séries, la playlist qui 
   <img src="docs/screenshots/player.png" width="200" alt="Séance en cours">
 </p>
 
+<p align="center">
+  <img src="docs/screenshots/sources.png" width="200" alt="Choix des sources musicales">
+  <img src="docs/screenshots/mixed-session.png" width="200" alt="Séance mêlant YouTube et Apple Music">
+  <img src="docs/screenshots/apple-search.png" width="200" alt="Recherche Apple Music">
+  <img src="docs/screenshots/playlist-provider.png" width="200" alt="Import de playlist : choix du service">
+  <img src="docs/screenshots/playlist-apple.png" width="200" alt="Import d'une playlist Apple Music">
+</p>
+
 ## Ce qu'il sait faire
 
 - **Tes morceaux, découpés au chrono.** Chaque étape joue un morceau pendant la durée choisie, à partir du
   passage que tu veux (le refrain qui envoie, pas l'intro de 40 secondes), avec un fondu en fin d'étape.
 - **Pauses et décomptes.** Un décompte avant le départ, des pauses entre les exercices et des bips
   rythmés avant chaque changement : tu sais que ça tourne sans regarder l'écran.
-- **YouTube et YouTube Music.** Colle un lien de vidéo ou importe une playlist entière. Avec ton
-  abonnement Premium, pas de pub au milieu de la dernière série.
+- **YouTube et YouTube Music.** Colle un lien de vidéo ou importe une playlist entière. Les publicités
+  dépendent de ton abonnement : avec YouTube Premium (ou YouTube Music Premium), aucune pub au milieu de
+  la dernière série ; sans abonnement, YouTube peut en insérer.
+- **Apple Music.** Cherche un morceau ou colle un lien, importe une playlist ou un album, ou directement
+  tes playlists. Abonnement Apple Music requis pour la lecture complète.
+- **Mélange les sources.** Une même séance peut enchaîner YouTube, Apple Music et tes fichiers.
+  Menu ⋮ > Sources pour n'afficher que celles que tu utilises.
 - **Tes propres fichiers.** Ajoute tes MP3 : ils restent sur le téléphone et fonctionnent hors ligne,
   même écran éteint.
 - **Rapide à construire.** Durées en un geste (presets 1, 2, 3, 5 min ou roues façon réveil),
@@ -78,7 +91,10 @@ Elle s'ouvre ensuite en plein écran comme une vraie app et garde l'écran allum
 
 ## Bon à savoir
 
-- Pour profiter de YouTube Premium, connecte-toi à YouTube dans le même navigateur.
+- **Publicités YouTube** : elles dépendent de ton abonnement YouTube / YouTube Music, pas de Workout Player.
+  Pour profiter de Premium (sans pub), connecte-toi à YouTube dans le même navigateur.
+- **Apple Music** : connecte ton compte (Menu ⋮ > Sources) ; sans abonnement actif, Apple ne permet pas la
+  lecture complète des morceaux.
 - Les playlists doivent être publiques ou non répertoriées (les playlists privées, comme « J'aime »,
   ne sont pas lisibles par le lecteur intégré). Certains clips interdisent la lecture hors de YouTube :
   le lecteur le signale et le chrono continue.
@@ -87,7 +103,7 @@ Elle s'ouvre ensuite en plein écran comme une vraie app et garde l'écran allum
 ## Vie privée
 
 Pas de compte, pas de pub, pas de pistage. Tes séances et tes fichiers restent sur ton appareil.
-Seul le lecteur YouTube communique avec Google quand tu l'utilises.
+Seuls les services de musique que tu utilises (YouTube, Apple Music) communiquent avec leurs serveurs.
 Détails dans les [mentions légales](docs/LEGAL.md).
 
 ## Contribuer
@@ -101,4 +117,5 @@ Pour lancer le projet en local et comprendre son architecture, voir la
 [MIT](LICENSE). Les bibliothèques utilisées et leurs licences sont listées dans
 [THIRD_PARTY_LICENSES.md](THIRD_PARTY_LICENSES.md).
 
-Workout Player n'est pas affilié à YouTube ni à Google.
+Workout Player n'est affilié ni à YouTube / Google, ni à Apple. YouTube est une marque de Google LLC,
+Apple Music une marque d'Apple Inc.

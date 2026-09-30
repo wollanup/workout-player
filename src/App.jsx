@@ -7,7 +7,7 @@ import { SessionEditor } from './components/SessionEditor.jsx';
 import { PlayerScreen } from './components/PlayerScreen.jsx';
 import { useSessions } from './hooks/useSessions.js';
 import { useEngineState } from './hooks/useEngineState.js';
-import { beeper, engine, youtube, YT_HOST_ID } from './app/runtime.js';
+import { apple, beeper, engine, youtube, YT_HOST_ID } from './app/runtime.js';
 import { newSession, validateSession } from './core/model.js';
 import { notifyError } from './app/feedback.jsx';
 
@@ -40,7 +40,7 @@ export function App() {
       <AppShell header={{ height: 60 }}>
         <AppShell.Header>
           <Container size="sm" h="100%" px={0}>
-            <AppHeader onHome={view.name === 'edit' ? toList : undefined} />
+            <AppHeader apple={apple} onHome={view.name === 'edit' ? toList : undefined} />
           </Container>
         </AppShell.Header>
         <AppShell.Main>
@@ -60,7 +60,8 @@ export function App() {
                 key={view.session.id}
                 session={view.session}
                 youtube={youtube}
-            beeper={beeper}
+                apple={apple}
+                beeper={beeper}
                 onClose={toList}
                 onSave={save}
                 onPlay={s => { save(s); play(s); }}
