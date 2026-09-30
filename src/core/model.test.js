@@ -52,7 +52,15 @@ describe('beeps', () => {
   it('plan only contains beeps within the remaining time, ends with a long beep', () => {
     const plan = beepPlan(2, 5);
     expect(plan.every(b => b.offset >= 0 && b.offset <= 2)).toBe(true);
-    expect(plan.at(-1)).toMatchObject({ offset: 2, freq: 1320 });
+    expect(plan.at(-1)).toMatchObject({ offset: 2, freq: 660 });
     expect(beepPlan(0, 5)).toHaveLength(1);
+  });
+
+  it('countdown pitch rises subtly (2 semitones), final beep one octave above the start', () => {
+    const plan = beepPlan(5, 5);
+    const ticks = plan.slice(0, -1).map(b => b.freq);
+    expect(ticks[0]).toBe(330);
+    expect(ticks.at(-1)).toBeCloseTo(330 * 2 ** (2 / 12)); // ~370 Hz
+    ticks.slice(1).forEach((f, i) => expect(f).toBeGreaterThanOrEqual(ticks[i]));
   });
 });

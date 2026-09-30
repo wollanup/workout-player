@@ -12,16 +12,21 @@ export function beepTimes(countdown, { factor = 0.8, minGap = 0.12 } = {}) {
 
 /**
  * Beeps to schedule from now, given the remaining time of the step.
- * Pitch rises with the pace; a long high beep marks the transition.
+ * Pitch rises slightly with the pace (BEEP_RISE semitones); a long beep one octave up marks the transition.
  * @returns {{offset: number, freq: number, len: number, vol: number}[]}
  */
+export const BEEP_BASE_FREQ = 330;
+export const BEEP_RISE = 2;
+export const FINAL_BEEP_FREQ = BEEP_BASE_FREQ * 2;
+
 export function beepPlan(remaining, countdown) {
   const times = beepTimes(countdown);
   const plan = [];
   times.forEach((t, k) => {
     if (t > remaining + 0.02) return;
-    plan.push({ offset: remaining - t, freq: 660 + (k / Math.max(1, times.length - 1)) * 330, len: 0.07, vol: 0.25 });
+    const semitones = (k / Math.max(1, times.length - 1)) * BEEP_RISE;
+    plan.push({ offset: remaining - t, freq: BEEP_BASE_FREQ * 2 ** (semitones / 12), len: 0.07, vol: 0.25 });
   });
-  plan.push({ offset: Math.max(0, remaining), freq: 1320, len: 0.4, vol: 0.3 });
+  plan.push({ offset: Math.max(0, remaining), freq: FINAL_BEEP_FREQ, len: 0.4, vol: 0.3 });
   return plan;
 }
