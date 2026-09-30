@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { Button, Fieldset, Progress, Stack, Switch, Text, TextInput } from '@mantine/core';
+import { Button, Fieldset, Progress, SimpleGrid, Stack, Switch, Text, TextInput } from '@mantine/core';
 import { IconPlaylistAdd } from '@tabler/icons-react';
 import { DurationInput } from './DurationInput.jsx';
+import { MUSIC_PRESETS } from '../core/time.js';
 import { parseYouTube } from '../core/youtube.js';
 import { stepsFromPlaylist } from '../core/model.js';
 import { youTubeTrackInfo } from '../services/trackInfo.js';
@@ -47,8 +48,13 @@ export function PlaylistImport({ youtube, onAdd, onUpdate }) {
           value={url} onChange={e => setUrl(e.currentTarget.value)} error={status.error} />
         <Switch label="Morceaux entiers" description="Durée de chaque étape = durée du morceau"
           checked={wholeTrack} onChange={e => setWholeTrack(e.currentTarget.checked)} />
-        {!wholeTrack && <DurationInput label="Durée par morceau" value={duration} onChange={setDuration} />}
-        <DurationInput label="Pause entre" description="0 = aucune" min={0} value={pause} onChange={setPause} />
+        <SimpleGrid cols={2} spacing="xs">
+          {wholeTrack ? <div /> : (
+            <DurationInput label="Durée par morceau" value={duration} onChange={setDuration} presets={MUSIC_PRESETS} />
+          )}
+          <DurationInput label="Pause entre" min={0} maxMinutes={5} value={pause} onChange={setPause}
+            presets={[0, 10, 20, 30]} />
+        </SimpleGrid>
         <Button leftSection={<IconPlaylistAdd size={18} />} loading={status.loading} onClick={run} disabled={!url}>
           Importer
         </Button>

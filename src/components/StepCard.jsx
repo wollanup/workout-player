@@ -1,15 +1,15 @@
 import { useState } from 'react';
 import {
-  ActionIcon, Alert, Anchor, Badge, Button, Card, FileButton, Group, Loader, NumberInput, Stack, Text, TextInput,
+  ActionIcon, Alert, Anchor, Badge, Button, Card, FileButton, Group, Loader, NumberInput, SimpleGrid, Stack, Text, TextInput,
 } from '@mantine/core';
 import {
-  IconAlertTriangle, IconArrowDown, IconArrowUp, IconArrowsHorizontal, IconBrandYoutube, IconFileMusic,
+  IconAlertTriangle, IconArrowDown, IconArrowUp, IconBrandYoutube, IconFileMusic,
   IconMusic, IconPlayerPause, IconTrash,
 } from '@tabler/icons-react';
 import { DurationInput } from './DurationInput.jsx';
 import { parseYouTube } from '../core/youtube.js';
 import { trackFit } from '../core/tracks.js';
-import { formatTime } from '../core/time.js';
+import { MUSIC_PRESETS, PAUSE_PRESETS, formatTime } from '../core/time.js';
 
 const KIND = {
   pause: { label: 'Pause', color: 'orange', Icon: IconPlayerPause },
@@ -98,7 +98,8 @@ export function StepCard({ step, index, isFirst, isLast, analyzing, onChange, on
 
       {step.type === 'pause' ? (
         <Stack gap="xs">
-          <DurationInput label="Durée" value={step.duration} onChange={duration => onChange({ duration })} />
+          <DurationInput label="Durée" value={step.duration} maxMinutes={5} presets={PAUSE_PRESETS}
+            onChange={duration => onChange({ duration })} />
           <TextInput label="Libellé" placeholder="Pause" value={step.label}
             onChange={e => onChange({ label: e.currentTarget.value })} />
         </Stack>
@@ -118,22 +119,28 @@ export function StepCard({ step, index, isFirst, isLast, analyzing, onChange, on
           )}
           <TextInput label="Titre" placeholder="Artiste - Titre" value={step.label}
             onChange={e => onChange({ label: e.currentTarget.value })} />
-          <DurationInput
-            label="Durée"
-            value={step.duration}
-            onChange={duration => onChange({ duration })}
-            rightSection={fit && fit.available > 0 && fit.available !== step.duration && (
-              <ActionIcon variant="light" size={36} onClick={() => onChange({ duration: fit.available })}
-                aria-label="Jusqu’à la fin du morceau" title="Jusqu’à la fin du morceau">
-                <IconArrowsHorizontal size={18} />
-              </ActionIcon>
-            )}
-          />
-          <Group gap="md" align="flex-end">
-            <DurationInput label="Début à" min={0} value={step.start} onChange={start => onChange({ start })} />
-            <NumberInput label="Fondu" suffix=" s" min={0} max={30} w={80} value={step.fade} allowDecimal={false}
+          <SimpleGrid cols={3} spacing="xs">
+            <DurationInput
+              label="Durée"
+              value={step.duration}
+              onChange={duration => onChange({ duration })}
+              presets={MUSIC_PRESETS}
+              maxMinutes={Math.max(10, Math.ceil((fit?.available ?? 0) / 60))}
+              extra={(set, current) => fit && fit.available > 0 && (
+                <Button size="compact-md" px={6} miw="fit-content" color="grape"
+                  variant={fit.available === current ? 'filled' : 'light'}
+                  leftSection={<IconMusic size={16} />} styles={{ section: { marginInlineEnd: 4 } }}
+                  onClick={() => set(fit.available)}
+                  aria-label={`Morceau entier (${formatTime(fit.available)})`} title="Jusqu’à la fin du morceau">
+                  {formatTime(fit.available)}
+                </Button>
+              )}
+            />
+            <DurationInput label="Début à" min={0} value={step.start} onChange={start => onChange({ start })}
+              maxMinutes={step.trackDuration > 0 ? Math.ceil(step.trackDuration / 60) : 10} />
+            <NumberInput label="Fondu" suffix=" s" min={0} max={30} value={step.fade} allowDecimal={false}
               onChange={v => onChange({ fade: Math.max(0, +v || 0) })} />
-          </Group>
+          </SimpleGrid>
           <FitWarning step={step} fit={fit} onChange={onChange} />
         </Stack>
       )}

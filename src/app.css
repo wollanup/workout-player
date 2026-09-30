@@ -52,3 +52,51 @@
   width: 100%;
   height: 100%;
 }
+
+/* Scroll wheel picker (WheelPicker.jsx) */
+.wheel-box {
+  --wheel-item: 36px;
+  position: relative;
+  width: 76px;
+}
+.wheel-box::before {
+  content: '';
+  position: absolute;
+  inset: calc(var(--wheel-item) * 2) 0 auto;
+  height: var(--wheel-item);
+  border-radius: var(--mantine-radius-md);
+  background: var(--mantine-color-default-hover);
+  border: 1px solid var(--mantine-color-default-border);
+  pointer-events: none;
+}
+.wheel {
+  position: relative;
+  height: calc(var(--wheel-item) * 5);
+  overflow-y: scroll;
+  scroll-snap-type: y mandatory;
+  overscroll-behavior: contain;
+  scrollbar-width: none;
+  touch-action: pan-y;
+  mask-image: linear-gradient(transparent, #000 30%, #000 70%, transparent);
+  border-radius: var(--mantine-radius-md);
+}
+.wheel::-webkit-scrollbar { display: none; }
+.wheel:focus-visible { outline: 2px solid var(--mantine-primary-color-filled); }
+.wheel-pad { height: calc(var(--wheel-item) * 2); }
+.wheel-item {
+  height: var(--wheel-item);
+  scroll-snap-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+  user-select: none;
+}
+.wheel-item[data-selected] { font-weight: 700; }
+
+@media (max-width: $mantine-breakpoint-sm) {
+  .wheel-box { --wheel-item: 52px; width: 104px; }
+  .wheel-item { font-size: 1.75rem; }
+}

@@ -23,25 +23,30 @@ describe('SessionEditor', () => {
     await userEvent.click(screen.getByRole('button', { name: 'Pause' }));
     expect(screen.getByTestId('total')).toHaveTextContent('0:25');
 
-    const minutes = screen.getByLabelText('Durée (minutes)');
-    await userEvent.clear(minutes);
-    await userEvent.type(minutes, '1');
-    fireEvent.blur(minutes);
-    expect(screen.getByTestId('total')).toHaveTextContent('1:25');
-
-    await userEvent.click(screen.getByRole('button', { name: 'Durée : plus 5 s' }));
-    expect(screen.getByTestId('total')).toHaveTextContent('1:30');
+    await userEvent.click(screen.getByRole('button', { name: 'Durée : 0:20' }));
+    await userEvent.click(await screen.findByRole('button', { name: '1 min' }));
+    expect(screen.getByTestId('total')).toHaveTextContent('0:25'); // not applied until validated
+    await userEvent.click(screen.getByRole('button', { name: 'Valider' }));
+    expect(screen.getByTestId('total')).toHaveTextContent('1:05');
   });
 
-  it('carries seconds over 59 into minutes', async () => {
+  it('picks minutes and seconds (10 s steps) with wheels in a modal, cancel keeps the value', async () => {
     renderEditor();
     await userEvent.click(screen.getByRole('button', { name: 'Pause' }));
-    const seconds = screen.getByLabelText('Durée (secondes)');
-    await userEvent.clear(seconds);
-    await userEvent.type(seconds, '90');
-    fireEvent.blur(seconds);
-    expect(screen.getByLabelText('Durée (minutes)')).toHaveValue('1');
-    expect(screen.getByLabelText('Durée (secondes)')).toHaveValue('30');
+    await userEvent.click(screen.getByRole('button', { name: 'Durée : 0:20' }));
+    fireEvent.keyDown(await screen.findByRole('spinbutton', { name: 'Durée (minutes)' }), { key: 'ArrowDown' });
+    fireEvent.keyDown(screen.getByRole('spinbutton', { name: 'Durée (secondes)' }), { key: 'ArrowDown' });
+    expect(screen.getByTestId('Durée-value')).toHaveTextContent('1:30');
+    await userEvent.click(screen.getByText('50'));
+    expect(screen.getByTestId('Durée-value')).toHaveTextContent('1:50');
+
+    await userEvent.click(screen.getByRole('button', { name: 'Annuler' }));
+    expect(screen.getByTestId('total')).toHaveTextContent('0:25');
+
+    await userEvent.click(screen.getByRole('button', { name: 'Durée : 0:20' }));
+    fireEvent.keyDown(await screen.findByRole('spinbutton', { name: 'Durée (minutes)' }), { key: 'ArrowDown' });
+    await userEvent.click(screen.getByRole('button', { name: 'Valider' }));
+    expect(screen.getByTestId('total')).toHaveTextContent('1:25');
   });
 
   it('analyses a new video: "Artiste - Titre" label and track duration', async () => {
