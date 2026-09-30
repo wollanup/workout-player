@@ -110,9 +110,9 @@ Deux façons de la débloquer :
 - **Fais-la tourner toi-même.** Tu as déjà un compte Apple Developer ? Forke le dépôt, ajoute ta clé
   MusicKit dans les secrets GitHub, et ta version aura Apple Music. Tout est expliqué dans la
   [documentation technique](docs/DEVELOPMENT.md#apple-music).
-- **Motive-moi.** 100 encouragements à 1 € par an et je sors la carte bancaire. En attendant, une
-  étoile sur le dépôt ou une [issue](https://github.com/wollanup/workout-player/issues) pour dire que ça
-  t'intéresse, ça compte aussi.
+- **Motive-moi.** 100 encouragements à 1 € par an et je sors la carte bancaire :
+  [deviens sponsor](https://github.com/sponsors/wollanup), même pour 1 €. Une étoile sur le dépôt ou une
+  [issue](https://github.com/wollanup/workout-player/issues) pour dire que ça t'intéresse, ça compte aussi.
 
 (Un abonnement Apple Music reste nécessaire pour écouter les morceaux en entier.)
 

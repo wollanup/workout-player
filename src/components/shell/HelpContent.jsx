@@ -1,5 +1,5 @@
 import { Anchor, Group, List, Stack, Text } from '@mantine/core';
-import { IconBrandGithub, IconLicense, IconShieldLock } from '@tabler/icons-react';
+import { IconBrandGithub, IconHeart, IconLicense, IconShieldLock } from '@tabler/icons-react';
 
 /** @param {{apple?: boolean}} props apple: Apple Music is built in (developer token) */
 export function HelpContent({ apple = false }) {
@@ -18,6 +18,9 @@ export function HelpContent({ apple = false }) {
       <Group gap="xs" columnGap="lg">
         <Anchor href="https://github.com/wollanup/workout-player" target="_blank" rel="noopener" size="sm">
           <Group gap={4} wrap="nowrap"><IconBrandGithub size={16} /><Text span inherit>Code source</Text></Group>
+        </Anchor>
+        <Anchor href="https://github.com/sponsors/wollanup" target="_blank" rel="noopener" size="sm">
+          <Group gap={4} wrap="nowrap"><IconHeart size={16} /><Text span inherit>Soutenir le projet</Text></Group>
         </Anchor>
         <Anchor href={`${import.meta.env.BASE_URL}licenses.txt`} target="_blank" size="sm">
           <Group gap={4} wrap="nowrap"><IconLicense size={16} /><Text span inherit>Licences open source</Text></Group>
