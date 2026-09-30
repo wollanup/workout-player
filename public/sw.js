@@ -1,4 +1,4 @@
-const CACHE = 'workout-player-v2';
+const CACHE = 'workout-player-v3';
 // Hashed Vite assets are cached on the fly by the fetch handler.
 const SHELL = ['./', 'manifest.webmanifest', 'icon.svg', 'icon-192.png', 'apple-touch-icon.png'];
 
@@ -13,11 +13,17 @@ self.addEventListener('activate', e => {
 });
 
 // Network first for the app shell (always fresh when online), cache as offline fallback.
+// GitHub Pages sends max-age=600: unhashed files (index.html...) are revalidated, or a deploy would
+// stay invisible for up to 10 minutes. Hashed assets never change, the HTTP cache is fine for them.
+const hashed = url => url.pathname.includes('/assets/');
+
 self.addEventListener('fetch', e => {
   const url = new URL(e.request.url);
   if (e.request.method !== 'GET' || url.origin !== location.origin) return;
+  // A navigate-mode Request cannot be re-created with options: fetch the URL instead.
+  const net = hashed(url) ? fetch(e.request) : fetch(url.href, { cache: 'no-cache' });
   e.respondWith(
-    fetch(e.request)
+    net
       .then(res => {
         const copy = res.clone();
         caches.open(CACHE).then(c => c.put(e.request, copy));

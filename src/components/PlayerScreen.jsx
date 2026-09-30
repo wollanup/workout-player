@@ -6,7 +6,7 @@ import {
 import { useEngineState } from '../hooks/useEngineState.js';
 import { formatTime } from '../core/time.js';
 import { stepTitle } from '../core/model.js';
-import { confirm } from '../app/feedback.jsx';
+import { confirmStop } from '../app/stopSession.js';
 import { sessionProgress } from '../player/progress.js';
 
 export function PlayerScreen({ engine, onExit }) {
@@ -23,7 +23,7 @@ export function PlayerScreen({ engine, onExit }) {
   const waiting = !done && (!st.ready || st.status === 'paused');
 
   async function stop() {
-    if (done || await confirm({ title: 'Arrêter la séance ?', confirmLabel: 'Arrêter', danger: true })) {
+    if (await confirmStop(engine)) {
       engine.stop();
       onExit();
     }

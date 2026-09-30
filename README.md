@@ -88,6 +88,8 @@ Workout Player est une application web installable, sans store ni compte :
 - **iPhone (Safari)** : ouvre le site, bouton Partager puis « Sur l'écran d'accueil ».
 
 Elle s'ouvre ensuite en plein écran comme une vraie app et garde l'écran allumé pendant la séance.
+Elle se met à jour toute seule, et le bouton retour de ton téléphone fonctionne comme attendu
+(avec une confirmation avant de quitter une séance en cours).
 
 ## Bon à savoir
 
