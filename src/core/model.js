@@ -2,8 +2,9 @@ export const uid = () => Math.random().toString(36).slice(2, 10) + Date.now().to
 
 /**
  * @typedef {{id: string, type: 'pause', label: string, duration: number, lead?: boolean}} PauseStep
- * @typedef {{id: string, type: 'music', source: 'yt'|'local', label: string, duration: number,
- *   start: number, fade: number, videoId?: string, fileId?: string, fileName?: string}} MusicStep
+ * @typedef {{id: string, type: 'music', source: 'yt'|'apple'|'local', label: string, duration: number,
+ *   start: number, fade: number, videoId?: string, appleId?: string, fileId?: string, fileName?: string,
+ *   trackDuration?: number}} MusicStep
  * @typedef {PauseStep|MusicStep} Step
  * @typedef {{id: string, name: string, lead: number, countdown: number, steps: Step[]}} Session
  */
@@ -22,7 +23,10 @@ export const totalDuration = s => (+s.lead || 0) + s.steps.reduce((a, x) => a + 
 
 export const stepTitle = s => s.type === 'pause'
   ? (s.label || 'Pause')
-  : (s.label || s.fileName || s.videoId || 'Morceau');
+  : (s.label || s.fileName || mediaRef(s) || 'Morceau');
+
+/** Identifier of the track to play, whatever the source. */
+export const mediaRef = s => ({ yt: s.videoId, apple: s.appleId, local: s.fileId })[s.source];
 
 /** Steps actually played: optional "get ready" lead pause + session steps. */
 export function buildRunSteps(session) {
@@ -39,17 +43,25 @@ export function validateSession(session) {
   if (!session.steps.length) errors.push('Ajoute au moins une étape.');
   session.steps.forEach((s, i) => {
     if (!(+s.duration > 0)) errors.push(`Étape ${i + 1} : durée invalide.`);
-    if (s.type === 'music' && (s.source === 'yt' ? !s.videoId : !s.fileId)) {
+    if (s.type === 'music' && !mediaRef(s)) {
       errors.push(`Étape ${i + 1} : aucune musique sélectionnée.`);
     }
   });
   return errors;
 }
 
-/** Builds steps from a list of YouTube IDs, with optional pauses in between. */
-export function stepsFromPlaylist(videoIds, duration, pause = 0) {
-  return videoIds.flatMap((videoId, k) => [
+/**
+ * Builds steps from imported tracks (any source), with optional pauses in between.
+ * `wholeTrack`: each step lasts as long as its track, when known.
+ * @param {string} source
+ * @param {Array<{videoId?: string, appleId?: string, label?: string, trackDuration?: number}>} tracks
+ */
+export function stepsFromTracks(source, tracks, { duration, pause = 0, wholeTrack = false }) {
+  return tracks.flatMap(({ artwork, ...t }, k) => [
     ...(k > 0 && pause > 0 ? [newPause(pause)] : []),
-    newMusic('yt', { videoId, duration }),
+    newMusic(source, {
+      ...t,
+      duration: wholeTrack && t.trackDuration > 0 ? Math.floor(t.trackDuration) : duration,
+    }),
   ]);
 }

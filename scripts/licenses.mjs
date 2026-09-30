@@ -56,6 +56,8 @@ ${list.map(p => `| ${p.url ? `[${p.name}](${p.url})` : p.name} | ${p.version} | 
 - Polices : polices système de l'appareil, aucune police téléchargée.
 - YouTube est une marque de Google LLC. La lecture passe par le lecteur officiel (YouTube IFrame Player API),
   soumis aux [conditions d'utilisation de YouTube](https://www.youtube.com/t/terms) ; aucun contenu n'est copié ni redistribué.
+- Apple Music est une marque d'Apple Inc. MusicKit JS est chargé depuis les serveurs d'Apple (non inclus
+  dans l'application) et soumis aux conditions d'Apple.
 `);
 
 const own = readFileSync('LICENSE', 'utf8').trim();

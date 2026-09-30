@@ -1,12 +1,13 @@
 import { useState } from 'react';
 import { ActionIcon, Group, Menu, Modal, Title, UnstyledButton } from '@mantine/core';
-import { IconBarbell, IconDotsVertical, IconHelpCircle, IconPalette } from '@tabler/icons-react';
+import { IconBarbell, IconDotsVertical, IconHelpCircle, IconPalette, IconPlug } from '@tabler/icons-react';
 import { ThemeSettings } from './ThemeSettings.jsx';
 import { HelpContent } from './HelpContent.jsx';
+import { SourcesSettings } from './SourcesSettings.jsx';
 
 export const APP_NAME = 'Workout Player';
 
-export function AppHeader({ onHome }) {
+export function AppHeader({ onHome, apple }) {
   const [dialog, setDialog] = useState(null);
   const close = () => setDialog(null);
 
@@ -26,11 +27,15 @@ export function AppHeader({ onHome }) {
           </ActionIcon>
         </Menu.Target>
         <Menu.Dropdown>
+          <Menu.Item leftSection={<IconPlug size={18} />} onClick={() => setDialog('sources')}>Sources</Menu.Item>
           <Menu.Item leftSection={<IconPalette size={18} />} onClick={() => setDialog('theme')}>Thème</Menu.Item>
           <Menu.Item leftSection={<IconHelpCircle size={18} />} onClick={() => setDialog('help')}>Aide</Menu.Item>
         </Menu.Dropdown>
       </Menu>
 
+      <Modal opened={dialog === 'sources'} onClose={close} title="Sources musicales" centered>
+        <SourcesSettings apple={apple} />
+      </Modal>
       <Modal opened={dialog === 'theme'} onClose={close} title="Thème" centered>
         <ThemeSettings />
       </Modal>

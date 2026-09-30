@@ -2,20 +2,20 @@ import { useState } from 'react';
 import {
   ActionIcon, Alert, Anchor, Badge, Button, Card, FileButton, Group, Loader, SimpleGrid, Stack, Text, TextInput,
 } from '@mantine/core';
-import {
-  IconAlertTriangle, IconArrowDown, IconArrowUp, IconBrandYoutube, IconFileMusic,
-  IconMusic, IconPlayerPause, IconTrash,
-} from '@tabler/icons-react';
+import { IconAlertTriangle, IconArrowDown, IconArrowUp, IconMusic, IconPlayerPause, IconTrash } from '@tabler/icons-react';
+import { AppleField } from './AppleField.jsx';
 import { DurationInput } from './DurationInput.jsx';
 import { SecondsInput } from './SecondsInput.jsx';
 import { parseYouTube } from '../core/youtube.js';
 import { trackFit } from '../core/tracks.js';
 import { MUSIC_PRESETS, PAUSE_PRESETS, formatTime } from '../core/time.js';
+import { SOURCES } from '../core/sources.js';
+import { SOURCE_ICONS } from '../app/sourceIcons.js';
 
 const KIND = {
   pause: { label: 'Pause', color: 'orange', Icon: IconPlayerPause },
-  yt: { label: 'YouTube', color: 'red', Icon: IconBrandYoutube },
-  local: { label: 'Fichier local', color: 'blue', Icon: IconFileMusic },
+  ...Object.fromEntries(SOURCES.map(s => [s.id, { ...s, Icon: SOURCE_ICONS[s.id] }])),
+  local: { label: 'Fichier local', color: 'blue', Icon: SOURCE_ICONS.local },
 };
 
 function YouTubeField({ step, onVideo }) {
@@ -66,25 +66,25 @@ function FitWarning({ step, fit, onChange }) {
   );
 }
 
-export function StepCard({ step, index, isFirst, isLast, analyzing, onChange, onVideo, onMove, onRemove, onPickFile }) {
+export function StepCard({ step, index, isFirst, isLast, analyzing, apple, onChange, onVideo, onMove, onRemove, onPickFile }) {
   const kind = KIND[step.type === 'pause' ? 'pause' : step.source];
   const fit = trackFit(step);
 
   return (
     <Card withBorder padding="sm" radius="md" style={{ borderLeft: `4px solid var(--mantine-color-${kind.color}-6)` }}>
-      <Group justify="space-between" wrap="nowrap" mb="xs">
-        <Group gap={6} wrap="nowrap">
-          <kind.Icon size={20} color={`var(--mantine-color-${kind.color}-5)`} />
-          <Text fw={600} className="nowrap">{index + 1}. {kind.label}</Text>
+      <Group justify="space-between" wrap="nowrap" mb="xs" gap={4}>
+        <Group gap={4} wrap="nowrap" miw={0}>
+          <kind.Icon size={20} color={`var(--mantine-color-${kind.color}-5)`} style={{ flexShrink: 0 }} />
+          <Text fw={600} truncate>{index + 1}. {kind.label}</Text>
           {analyzing && <Loader size={14} aria-label="Analyse du morceau" />}
           {!analyzing && step.trackDuration > 0 && (
-            <Badge size="lg" variant="light" color="gray" leftSection={<IconMusic size={16} />} title="Durée du morceau"
+            <Badge size="md" variant="light" color="gray" leftSection={<IconMusic size={14} />} title="Durée du morceau"
               style={{ flexShrink: 0 }} styles={{ label: { overflow: 'visible' } }}>
               {formatTime(step.trackDuration)}
             </Badge>
           )}
         </Group>
-        <Group gap={4} wrap="nowrap">
+        <Group gap={0} wrap="nowrap" style={{ flexShrink: 0 }}>
           <ActionIcon variant="subtle" size="lg" disabled={isFirst} onClick={() => onMove(-1)} aria-label="Monter">
             <IconArrowUp size={20} />
           </ActionIcon>
@@ -106,9 +106,9 @@ export function StepCard({ step, index, isFirst, isLast, analyzing, onChange, on
         </Stack>
       ) : (
         <Stack gap="xs">
-          {step.source === 'yt' ? (
-            <YouTubeField step={step} onVideo={onVideo} />
-          ) : (
+          {step.source === 'yt' && <YouTubeField step={step} onVideo={onVideo} />}
+          {step.source === 'apple' && <AppleField step={step} apple={apple} onTrack={onChange} />}
+          {step.source === 'local' && (
             <Group wrap="nowrap" gap="xs">
               <Text size="sm" c={step.fileName ? undefined : 'red'} truncate style={{ flex: 1 }}>
                 {step.fileName || 'Aucun fichier'}

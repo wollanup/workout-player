@@ -24,7 +24,20 @@
 - Le titre et l'auteur des vidéos sont récupérés via le service oEmbed de YouTube.
 - Workout Player n'est ni affilié à YouTube ni approuvé par Google. YouTube est une marque de Google LLC.
 - Aucun contenu n'est téléchargé, copié ni redistribué : la lecture, les publicités et l'accès Premium
-  restent gérés par YouTube.
+  restent gérés par YouTube. La présence de publicités dépend de ton abonnement YouTube / YouTube Music
+  (aucune avec Premium).
+
+## Apple Music
+
+- Les morceaux Apple Music sont lus avec la bibliothèque officielle d'Apple, MusicKit JS, chargée depuis
+  les serveurs d'Apple (`js-cdn.music.apple.com`) uniquement si la source Apple Music est utilisée.
+- La connexion au compte se fait chez Apple : Workout Player ne voit jamais tes identifiants. Apple fournit
+  un jeton d'accès conservé par MusicKit dans ton navigateur ; « Déconnecter » (Menu > Sources) le supprime.
+- Les recherches, la lecture et l'accès à ta bibliothèque passent directement entre ton navigateur et Apple,
+  selon ses [conditions](https://www.apple.com/legal/internet-services/itunes/) et sa
+  [politique de confidentialité](https://www.apple.com/legal/privacy/).
+- Un abonnement Apple Music est nécessaire pour la lecture complète. Workout Player n'est ni affilié à
+  Apple ni approuvé par Apple. Apple Music est une marque d'Apple Inc.
 
 ## Fichiers audio
 

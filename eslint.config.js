@@ -14,6 +14,7 @@ export default [
       parserOptions: { ecmaFeatures: { jsx: true } },
       globals: { ...globals.browser, YT: 'readonly' },
     },
+    rules: { 'no-unused-vars': ['error', { ignoreRestSiblings: true }] },
   },
   reactHooks.configs.flat.recommended,
   {
