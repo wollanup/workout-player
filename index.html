@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#111827">
+  <!-- YouTube embeds need the Referer (origin) header, otherwise error 153 -->
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <title>Workout Player</title>
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="icon" href="/icon.svg">
+</head>
+<body>
+  <header><h1>🏋️ Workout Player</h1></header>
+  <main>
+    <section id="view-list" class="view"></section>
+    <section id="view-edit" class="view" hidden></section>
+    <section id="view-play" class="view" hidden>
+      <div class="play-head">
+        <button id="btn-stop">✕ Arrêter</button>
+        <span id="play-session" class="muted"></span>
+      </div>
+      <div id="play-step-label" class="step-label"></div>
+      <div id="play-timer" class="timer">0:00</div>
+      <div class="progress"><div id="play-progress"></div></div>
+      <div id="play-info" class="muted center"></div>
+      <div class="controls">
+        <button id="btn-prev" aria-label="Étape précédente">⏮</button>
+        <button id="btn-toggle" class="big" aria-label="Pause / lecture">⏸</button>
+        <button id="btn-next" aria-label="Étape suivante">⏭</button>
+      </div>
+      <div id="play-next" class="muted center"></div>
+      <div id="play-error" class="error center"></div>
+    </section>
+    <div id="yt-wrap" class="offscreen"><div id="yt"></div></div>
+    <audio id="audio" preload="auto"></audio>
+  </main>
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
