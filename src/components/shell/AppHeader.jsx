@@ -40,7 +40,7 @@ export function AppHeader({ onHome, apple }) {
         <ThemeSettings />
       </Modal>
       <Modal opened={dialog === 'help'} onClose={close} title="Aide" centered size="lg">
-        <HelpContent />
+        <HelpContent apple={!!apple?.configured} />
       </Modal>
     </Group>
   );

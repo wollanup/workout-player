@@ -10,16 +10,15 @@ const DESCRIPTIONS = {
   local: 'Fichiers audio du téléphone, copiés dans le navigateur : fonctionne hors ligne.',
 };
 
-/** Which music sources the editor offers. At least one stays on. */
+/** Which music sources the editor offers. At least one stays on; sources not built in are hidden. */
 export function SourcesSettings({ apple }) {
   const { available, active, setEnabled } = useSources(apple);
 
   return (
     <Stack gap="md">
       <Text size="sm" c="dimmed">Les sources activées apparaissent dans l’éditeur. Une séance peut les mélanger.</Text>
-      {SOURCES.map(({ id, label, color }, k) => {
+      {SOURCES.filter(({ id }) => available[id] !== false).map(({ id, label, color }, k) => {
         const Icon = SOURCE_ICONS[id];
-        const unavailable = available[id] === false;
         const on = active.includes(id);
         return (
           <Stack key={id} gap="xs">
@@ -29,12 +28,12 @@ export function SourcesSettings({ apple }) {
               aria-label={label}
               color={color}
               checked={on}
-              disabled={unavailable || (on && active.length === 1)}
+              disabled={on && active.length === 1}
               onChange={e => setEnabled(id, e.currentTarget.checked)}
               label={<Text span fw={600} style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
                 <Icon size={20} color={`var(--mantine-color-${color}-6)`} />{label}
               </Text>}
-              description={unavailable ? 'Non configuré sur cette installation (jeton développeur Apple manquant).' : DESCRIPTIONS[id]}
+              description={DESCRIPTIONS[id]}
             />
             {id === 'apple' && on && <AppleAccount apple={apple} />}
           </Stack>

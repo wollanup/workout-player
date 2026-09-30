@@ -32,14 +32,6 @@ le chrono, le téléphone à déverrouiller entre deux séries, la playlist qui 
   <img src="docs/screenshots/player.png" width="200" alt="Séance en cours">
 </p>
 
-<p align="center">
-  <img src="docs/screenshots/sources.png" width="200" alt="Choix des sources musicales">
-  <img src="docs/screenshots/mixed-session.png" width="200" alt="Séance mêlant YouTube et Apple Music">
-  <img src="docs/screenshots/apple-search.png" width="200" alt="Recherche Apple Music">
-  <img src="docs/screenshots/playlist-provider.png" width="200" alt="Import de playlist : choix du service">
-  <img src="docs/screenshots/playlist-apple.png" width="200" alt="Import d'une playlist Apple Music">
-</p>
-
 ## Ce qu'il sait faire
 
 - **Tes morceaux, découpés au chrono.** Chaque étape joue un morceau pendant la durée choisie, à partir du
@@ -49,9 +41,8 @@ le chrono, le téléphone à déverrouiller entre deux séries, la playlist qui 
 - **YouTube et YouTube Music.** Colle un lien de vidéo ou importe une playlist entière. Les publicités
   dépendent de ton abonnement : avec YouTube Premium (ou YouTube Music Premium), aucune pub au milieu de
   la dernière série ; sans abonnement, YouTube peut en insérer.
-- **Apple Music.** Cherche un morceau ou colle un lien, importe une playlist ou un album, ou directement
-  tes playlists. Abonnement Apple Music requis pour la lecture complète.
-- **Mélange les sources.** Une même séance peut enchaîner YouTube, Apple Music et tes fichiers.
+- **Mélange les sources.** Une même séance peut enchaîner YouTube et tes fichiers
+  (et Apple Music, [en option](#et-apple-music-)).
   Menu ⋮ > Sources pour n'afficher que celles que tu utilises.
 - **Tes propres fichiers.** Ajoute tes MP3 : ils restent sur le téléphone et fonctionnent hors ligne,
   même écran éteint.
@@ -95,17 +86,41 @@ Elle se met à jour toute seule, et le bouton retour de ton téléphone fonction
 
 - **Publicités YouTube** : elles dépendent de ton abonnement YouTube / YouTube Music, pas de Workout Player.
   Pour profiter de Premium (sans pub), connecte-toi à YouTube dans le même navigateur.
-- **Apple Music** : connecte ton compte (Menu ⋮ > Sources) ; sans abonnement actif, Apple ne permet pas la
-  lecture complète des morceaux.
 - Les playlists doivent être publiques ou non répertoriées (les playlists privées, comme « J'aime »,
   ne sont pas lisibles par le lecteur intégré). Certains clips interdisent la lecture hors de YouTube :
   le lecteur le signale et le chrono continue.
 - Avec YouTube, l'écran doit rester allumé (l'app s'en charge). Avec tes fichiers, pas besoin.
 
+## Et Apple Music ?
+
+Le code est là et il marche : recherche de morceaux, liens, import de playlists et d'albums, connexion
+à ton compte, mélange avec YouTube dans la même séance.
+
+<p align="center">
+  <img src="docs/screenshots/mixed-session.png" width="200" alt="Séance mêlant YouTube et Apple Music">
+  <img src="docs/screenshots/apple-search.png" width="200" alt="Recherche Apple Music">
+  <img src="docs/screenshots/playlist-apple.png" width="200" alt="Import d'une playlist Apple Music">
+</p>
+
+Mais Apple réserve MusicKit aux membres de l'Apple Developer Program, **99 $ par an**. Pour une app
+gratuite et sans pub, c'est non : l'option est donc **désactivée sur app.workout.stemux.fr**.
+
+Deux façons de la débloquer :
+
+- **Fais-la tourner toi-même.** Tu as déjà un compte Apple Developer ? Forke le dépôt, ajoute ta clé
+  MusicKit dans les secrets GitHub, et ta version aura Apple Music. Tout est expliqué dans la
+  [documentation technique](docs/DEVELOPMENT.md#apple-music).
+- **Motive-moi.** 100 encouragements à 1 € par an et je sors la carte bancaire. En attendant, une
+  étoile sur le dépôt ou une [issue](https://github.com/wollanup/workout-player/issues) pour dire que ça
+  t'intéresse, ça compte aussi.
+
+(Un abonnement Apple Music reste nécessaire pour écouter les morceaux en entier.)
+
 ## Vie privée
 
 Pas de compte, pas de pub, pas de pistage. Tes séances et tes fichiers restent sur ton appareil.
-Seuls les services de musique que tu utilises (YouTube, Apple Music) communiquent avec leurs serveurs.
+Seuls les services de musique que tu utilises (YouTube, et Apple Music s'il est activé) communiquent avec
+leurs serveurs.
 Détails dans les [mentions légales](docs/LEGAL.md).
 
 ## Contribuer
