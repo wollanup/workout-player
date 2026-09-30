@@ -88,6 +88,11 @@ Lecture via [MusicKit JS v3](https://js-cdn.music.apple.com/musickit/v3/docs/), 
 L'utilisateur se connecte à son compte (abonnement requis pour la lecture complète, sinon Apple ne
 fournit que des extraits : l'app demande alors de se connecter plutôt que de jouer 30 s).
 
+**Désactivé par défaut.** La source n'existe que si le build reçoit `VITE_APPLE_MUSIC_TOKEN` (en CI :
+les trois secrets ci-dessous). Sans jeton, Apple Music est complètement masqué : sources, éditeur, import
+de playlist, aide. L'instance officielle (app.workout.stemux.fr) le laisse désactivé, faute de compte
+Apple Developer. Un fork avec son propre compte l'active simplement en ajoutant ses secrets.
+
 ### Jeton développeur
 
 MusicKit exige un *developer token* : un JWT ES256 signé avec une clé MusicKit, valable 6 mois au plus.
@@ -120,8 +125,7 @@ gh secret set APPLE_PRIVATE_KEY -R wollanup/workout-player < AuthKey_XXXXXXXXXX.
 ```
 
 Le workflow génère le jeton à chaque build (limité à `https://app.workout.stemux.fr`) et reconstruit le
-site chaque mois pour le renouveler. Sans secrets, le build passe et Apple Music reste désactivé
-(« Non configuré » dans Menu > Sources).
+site chaque mois pour le renouveler. Sans secrets, le build passe et Apple Music reste masqué.
 
 ### Limites
 

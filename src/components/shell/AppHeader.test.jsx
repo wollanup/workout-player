@@ -27,19 +27,25 @@ describe('AppHeader', () => {
     expect(localStorage.getItem('mantine-color-scheme-value')).toBe('light');
   });
 
-  it('toggles sources, keeps at least one, and shows Apple Music as not configured without token', async () => {
+  it('toggles sources, keeps at least one, and hides Apple Music without developer token', async () => {
     render(<Providers><AppHeader apple={{ configured: false }} /></Providers>);
     await userEvent.click(screen.getByRole('button', { name: 'Menu' }));
     await userEvent.click(await screen.findByRole('menuitem', { name: 'Sources' }));
     expect(await screen.findByText(/Les publicités dépendent de ton abonnement/)).toBeInTheDocument();
-    const apple = screen.getByRole('switch', { name: 'Apple Music' });
-    expect(apple).toBeDisabled();
-    expect(apple).not.toBeChecked();
-    expect(screen.getByText(/Non configuré/)).toBeInTheDocument();
+    expect(screen.queryByRole('switch', { name: 'Apple Music' })).not.toBeInTheDocument();
 
     await userEvent.click(screen.getByRole('switch', { name: 'YouTube' }));
     expect(JSON.parse(localStorage.getItem('wp.sources'))).toEqual({ yt: false });
     expect(screen.getByRole('switch', { name: 'Fichier' })).toBeDisabled(); // last one left
+  });
+
+  it('mentions Apple Music in the help only when it is built in', async () => {
+    const { unmount } = render(<Providers><AppHeader apple={{ configured: false }} /></Providers>);
+    await userEvent.click(screen.getByRole('button', { name: 'Menu' }));
+    await userEvent.click(await screen.findByRole('menuitem', { name: 'Aide' }));
+    expect(await screen.findByText(/publique ou non répertoriée/)).toBeInTheDocument();
+    expect(screen.queryByText(/Apple Music/)).not.toBeInTheDocument();
+    unmount();
   });
 
   it('connects the Apple Music account from the sources', async () => {

@@ -29,6 +29,8 @@
 
 ## Apple Music
 
+- Désactivé sur l'instance officielle (app.workout.stemux.fr) ; seules les versions qui l'activent
+  (fork avec son propre compte Apple Developer) sont concernées par ce qui suit.
 - Les morceaux Apple Music sont lus avec la bibliothèque officielle d'Apple, MusicKit JS, chargée depuis
   les serveurs d'Apple (`js-cdn.music.apple.com`) uniquement si la source Apple Music est utilisée.
 - La connexion au compte se fait chez Apple : Workout Player ne voit jamais tes identifiants. Apple fournit
