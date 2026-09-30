@@ -32,6 +32,23 @@ allumé (Wake Lock) et le service worker. PC et téléphone doivent être sur le
 - Playlists : publiques ou non répertoriées uniquement ; certains clips interdisent la lecture intégrée (erreurs 101/150).
 - Lecture YouTube = écran allumé obligatoire. Les MP3 locaux fonctionnent écran éteint et hors ligne.
 
+## Déploiement (GitHub Pages)
+
+`.github/workflows/deploy.yml` : lint + tests + build à chaque push / PR ; sur `main`, publication sur GitHub Pages
+à l'adresse https://app.workout.stemux.fr (`public/CNAME`).
+
+Mise en place (une seule fois) :
+
+1. DNS `stemux.fr` : enregistrement `CNAME app.workout -> <compte>.github.io.`
+2. Créer le repo et pousser : `gh repo create workout-player --public --source . --push`
+3. Activer Pages via Actions et le domaine :
+   `gh api -X POST repos/<compte>/workout-player/pages -f build_type=workflow`
+   puis `gh api -X PUT repos/<compte>/workout-player/pages -f cname=app.workout.stemux.fr`
+4. Relancer le workflow (`gh workflow run deploy.yml`), puis cocher « Enforce HTTPS » une fois le certificat émis.
+
+PWA : `public/manifest.webmanifest`, `public/sw.js` (network-first, cache hors ligne), icônes générées depuis
+`public/icon*.svg` par `scripts/icons.mjs`.
+
 ## Stack
 
 React 19 + Mantine 9 (UI, modales, notifications) + Tabler Icons (SVG), Vite, Vitest + Testing Library, ESLint.

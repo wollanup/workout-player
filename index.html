@@ -7,8 +7,14 @@
   <!-- YouTube embeds need the Referer (origin) header, otherwise error 153 -->
   <meta name="referrer" content="strict-origin-when-cross-origin">
   <title>Workout Player</title>
+  <meta name="description" content="Lecteur musical pour séances de sport : morceaux minutés, pauses et décomptes bipés.">
   <link rel="manifest" href="/manifest.webmanifest">
-  <link rel="icon" href="/icon.svg">
+  <link rel="icon" href="/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Workout">
   <script>
     // Apply the saved color scheme before first paint (Mantine key), avoids a dark/light flash.
     (function () {

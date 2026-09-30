@@ -1,6 +1,6 @@
-const CACHE = 'workout-player-v1';
+const CACHE = 'workout-player-v2';
 // Hashed Vite assets are cached on the fly by the fetch handler.
-const SHELL = ['./', 'manifest.webmanifest', 'icon.svg'];
+const SHELL = ['./', 'manifest.webmanifest', 'icon.svg', 'icon-192.png', 'apple-touch-icon.png'];
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(SHELL)).then(() => self.skipWaiting()));

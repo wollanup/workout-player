@@ -22,6 +22,6 @@ export default [
     rules: { 'react-refresh/only-export-components': ['warn', { allowConstantExport: true }] },
   },
   { files: ['public/sw.js'], languageOptions: { sourceType: 'script', globals: globals.serviceworker } },
-  { files: ['*.config.{js,cjs}'], languageOptions: { globals: globals.node } },
+  { files: ['*.config.{js,cjs}', 'scripts/**/*.{js,mjs}'], languageOptions: { globals: globals.node } },
   { files: ['**/*.test.{js,jsx}', 'src/test/**'], languageOptions: { globals: globals.node } },
 ];
