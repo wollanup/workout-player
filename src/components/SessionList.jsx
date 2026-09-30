@@ -4,6 +4,7 @@ import {
 } from '@tabler/icons-react';
 import { DurationBadge } from './DurationBadge.jsx';
 import { totalDuration } from '../core/model.js';
+import { plural } from '../core/plural.js';
 import { confirm } from '../app/feedback.jsx';
 
 export function SessionList({ sessions, onNew, onEdit, onPlay, onDuplicate, onRemove }) {
@@ -31,9 +32,9 @@ export function SessionList({ sessions, onNew, onEdit, onPlay, onDuplicate, onRe
             <Stack gap={6} style={{ minWidth: 0 }}>
               <Text fw={600} size="lg" truncate>{s.name}</Text>
               <Group gap="xs">
-                <DurationBadge seconds={totalDuration(s)} size="md" />
+                <DurationBadge seconds={totalDuration(s)} />
                 <Text size="sm" c="dimmed">
-                  <IconListNumbers size={14} style={{ verticalAlign: -2 }} /> {s.steps.length} étape(s)
+                  <IconListNumbers size={14} style={{ verticalAlign: -2 }} /> {plural(s.steps.length, 'étape')}
                 </Text>
               </Group>
             </Stack>

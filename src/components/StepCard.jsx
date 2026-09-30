@@ -1,10 +1,15 @@
 import { useState } from 'react';
-import { ActionIcon, Button, Card, FileButton, Group, NumberInput, SimpleGrid, Text, TextInput } from '@mantine/core';
 import {
-  IconArrowDown, IconArrowUp, IconBrandYoutube, IconFileMusic, IconPlayerPause, IconTrash,
+  ActionIcon, Alert, Anchor, Badge, Button, Card, FileButton, Group, Loader, NumberInput, Stack, Text, TextInput,
+} from '@mantine/core';
+import {
+  IconAlertTriangle, IconArrowDown, IconArrowUp, IconArrowsHorizontal, IconBrandYoutube, IconFileMusic,
+  IconMusic, IconPlayerPause, IconTrash,
 } from '@tabler/icons-react';
-import { TimeInput } from './TimeInput.jsx';
-import { parseYouTube, fetchTitle } from '../core/youtube.js';
+import { DurationInput } from './DurationInput.jsx';
+import { parseYouTube } from '../core/youtube.js';
+import { trackFit } from '../core/tracks.js';
+import { formatTime } from '../core/time.js';
 
 const KIND = {
   pause: { label: 'Pause', color: 'orange', Icon: IconPlayerPause },
@@ -12,21 +17,19 @@ const KIND = {
   local: { label: 'Fichier local', color: 'blue', Icon: IconFileMusic },
 };
 
-function YouTubeField({ step, onChange }) {
+function YouTubeField({ step, onVideo }) {
   const [editing, setEditing] = useState(null);
-  const [error, setError] = useState(step.videoId ? null : 'Colle une URL YouTube / YT Music');
+  const [error, setError] = useState(null);
 
-  async function commit() {
+  function commit() {
     if (editing == null) return;
     const text = editing;
     setEditing(null);
+    if (!text.trim()) return;
     const p = parseYouTube(text);
     if (!p.videoId) return setError('URL ou ID de vidéo invalide');
     setError(null);
-    if (p.videoId === step.videoId) return;
-    onChange({ videoId: p.videoId, ...(p.start ? { start: p.start } : {}) });
-    const title = await fetchTitle(p.videoId);
-    if (title) onChange({ label: title });
+    if (p.videoId !== step.videoId) onVideo(p);
   }
 
   return (
@@ -34,26 +37,51 @@ function YouTubeField({ step, onChange }) {
       label="Vidéo"
       placeholder="https://music.youtube.com/watch?v=…"
       value={editing ?? (step.videoId ? `https://youtu.be/${step.videoId}` : '')}
-      error={error}
+      error={error || (!step.videoId && editing == null ? 'Colle une URL YouTube / YT Music' : null)}
       onFocus={e => { setEditing(e.currentTarget.value); e.currentTarget.select(); }}
       onChange={e => setEditing(e.currentTarget.value)}
       onBlur={commit}
-      onPaste={e => { const t = e.clipboardData.getData('text'); if (t) { e.preventDefault(); setEditing(t); } }}
       onKeyDown={e => { if (e.key === 'Enter') e.currentTarget.blur(); }}
     />
   );
 }
 
-export function StepCard({ step, index, isFirst, isLast, onChange, onMove, onRemove, onPickFile }) {
+function FitWarning({ step, fit, onChange }) {
+  if (!fit || fit.overrun <= 0) return null;
+  const msg = fit.available <= 0
+    ? `Le début (${formatTime(step.start)}) est après la fin du morceau (${formatTime(step.trackDuration)}).`
+    : `Il ne reste que ${formatTime(fit.available)} de morceau après ${formatTime(step.start)} : il reprendra au début.`;
+  return (
+    <Alert color="yellow" variant="light" p="xs" icon={<IconAlertTriangle size={18} />}>
+      <Text size="sm">{msg}</Text>
+      {fit.available > 0 ? (
+        <Anchor component="button" size="sm" onClick={() => onChange({ duration: fit.available })}>
+          Ajuster la durée à {formatTime(fit.available)}
+        </Anchor>
+      ) : (
+        <Anchor component="button" size="sm" onClick={() => onChange({ start: 0 })}>Démarrer au début</Anchor>
+      )}
+    </Alert>
+  );
+}
+
+export function StepCard({ step, index, isFirst, isLast, analyzing, onChange, onVideo, onMove, onRemove, onPickFile }) {
   const kind = KIND[step.type === 'pause' ? 'pause' : step.source];
-  const duration = <TimeInput label="Durée" value={step.duration} onChange={duration => onChange({ duration })} />;
+  const fit = trackFit(step);
 
   return (
     <Card withBorder padding="sm" radius="md" style={{ borderLeft: `4px solid var(--mantine-color-${kind.color}-6)` }}>
       <Group justify="space-between" wrap="nowrap" mb="xs">
         <Group gap={6} wrap="nowrap">
           <kind.Icon size={20} color={`var(--mantine-color-${kind.color}-5)`} />
-          <Text fw={600}>{index + 1}. {kind.label}</Text>
+          <Text fw={600} className="nowrap">{index + 1}. {kind.label}</Text>
+          {analyzing && <Loader size={14} aria-label="Analyse du morceau" />}
+          {!analyzing && step.trackDuration > 0 && (
+            <Badge size="lg" variant="light" color="gray" leftSection={<IconMusic size={16} />} title="Durée du morceau"
+              style={{ flexShrink: 0 }} styles={{ label: { overflow: 'visible' } }}>
+              {formatTime(step.trackDuration)}
+            </Badge>
+          )}
         </Group>
         <Group gap={4} wrap="nowrap">
           <ActionIcon variant="subtle" size="lg" disabled={isFirst} onClick={() => onMove(-1)} aria-label="Monter">
@@ -69,15 +97,15 @@ export function StepCard({ step, index, isFirst, isLast, onChange, onMove, onRem
       </Group>
 
       {step.type === 'pause' ? (
-        <SimpleGrid cols={2}>
-          {duration}
+        <Stack gap="xs">
+          <DurationInput label="Durée" value={step.duration} onChange={duration => onChange({ duration })} />
           <TextInput label="Libellé" placeholder="Pause" value={step.label}
             onChange={e => onChange({ label: e.currentTarget.value })} />
-        </SimpleGrid>
+        </Stack>
       ) : (
-        <>
+        <Stack gap="xs">
           {step.source === 'yt' ? (
-            <YouTubeField step={step} onChange={onChange} />
+            <YouTubeField step={step} onVideo={onVideo} />
           ) : (
             <Group wrap="nowrap" gap="xs">
               <Text size="sm" c={step.fileName ? undefined : 'red'} truncate style={{ flex: 1 }}>
@@ -88,14 +116,26 @@ export function StepCard({ step, index, isFirst, isLast, onChange, onMove, onRem
               </FileButton>
             </Group>
           )}
-          <TextInput mt="xs" label="Titre" value={step.label} onChange={e => onChange({ label: e.currentTarget.value })} />
-          <SimpleGrid cols={3} mt="xs">
-            {duration}
-            <TimeInput label="Début à" allowZero value={step.start} onChange={start => onChange({ start })} />
-            <NumberInput label="Fondu (s)" min={0} max={30} value={step.fade} allowDecimal={false}
+          <TextInput label="Titre" placeholder="Artiste - Titre" value={step.label}
+            onChange={e => onChange({ label: e.currentTarget.value })} />
+          <DurationInput
+            label="Durée"
+            value={step.duration}
+            onChange={duration => onChange({ duration })}
+            rightSection={fit && fit.available > 0 && fit.available !== step.duration && (
+              <ActionIcon variant="light" size={36} onClick={() => onChange({ duration: fit.available })}
+                aria-label="Jusqu’à la fin du morceau" title="Jusqu’à la fin du morceau">
+                <IconArrowsHorizontal size={18} />
+              </ActionIcon>
+            )}
+          />
+          <Group gap="md" align="flex-end">
+            <DurationInput label="Début à" min={0} value={step.start} onChange={start => onChange({ start })} />
+            <NumberInput label="Fondu" suffix=" s" min={0} max={30} w={80} value={step.fade} allowDecimal={false}
               onChange={v => onChange({ fade: Math.max(0, +v || 0) })} />
-          </SimpleGrid>
-        </>
+          </Group>
+          <FitWarning step={step} fit={fit} onChange={onChange} />
+        </Stack>
       )}
     </Card>
   );

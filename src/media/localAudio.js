@@ -4,6 +4,7 @@ export function createLocalAudioAdapter(audio, getBlob) {
   let start = 0;
   let seeked = false;
   let objectUrl = null;
+  let cached = null; // { fileId, blob: Promise<Blob> } read ahead from IndexedDB
 
   audio.addEventListener('loadedmetadata', () => {
     if (seeked) return;
@@ -20,12 +21,17 @@ export function createLocalAudioAdapter(audio, getBlob) {
   audio.addEventListener('error', () => cb?.onError('Lecture du fichier impossible.'));
 
   return {
+    prepare(step) {
+      if (cached?.fileId === step.fileId) return;
+      cached = { fileId: step.fileId, blob: getBlob(step.fileId).catch(() => null) };
+    },
     async load(step, callbacks) {
       cb = callbacks;
       start = +step.start || 0;
       seeked = false;
       try {
-        const blob = await getBlob(step.fileId);
+        const blob = await (cached?.fileId === step.fileId ? cached.blob : getBlob(step.fileId));
+        cached = null;
         if (cb !== callbacks) return;
         if (!blob) throw new Error('Fichier audio introuvable (réimporte-le dans l’éditeur).');
         if (objectUrl) URL.revokeObjectURL(objectUrl);

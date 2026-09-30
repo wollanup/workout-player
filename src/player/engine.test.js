@@ -10,6 +10,7 @@ function fakeAdapter() {
     resume: vi.fn(),
     stop: vi.fn(() => { a.cb = null; }),
     setVolume: vi.fn(),
+    prepare: vi.fn(),
     preload: vi.fn(),
     stallHint: 'touch it',
   };
@@ -139,6 +140,26 @@ describe('WorkoutEngine', () => {
     expect(yt.load).not.toHaveBeenCalled();
     engine.stop();
     expect(engine.state.status).toBe('idle');
+  });
+
+  it('pre-buffers the next track when its player is idle', () => {
+    engine.start(session);
+    // yt step followed by a pause: nothing to prepare yet.
+    expect(local.prepare).not.toHaveBeenCalled();
+    engine.next();
+    // During the pause, the next (local) track is prepared.
+    expect(local.prepare).toHaveBeenCalledWith(session.steps[2]);
+    expect(yt.prepare).not.toHaveBeenCalled();
+
+    engine.start({ ...session, lead: 5 });
+    // Lead step prepares the first YouTube track.
+    expect(yt.prepare).toHaveBeenCalledWith(session.steps[0]);
+  });
+
+  it('does not prepare with the adapter currently playing', () => {
+    const s = { ...session, steps: [session.steps[0], { ...session.steps[0], id: '4', videoId: 'v2' }] };
+    engine.start(s);
+    expect(yt.prepare).not.toHaveBeenCalled();
   });
 
   it('notifies subscribers with new state objects', () => {

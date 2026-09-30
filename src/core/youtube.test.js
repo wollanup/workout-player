@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { parseYouTube, parseYtT, fetchTitle, ytErrorMessage } from './youtube.js';
+import { parseYouTube, parseYtT, fetchOEmbed, ytErrorMessage } from './youtube.js';
 
 describe('parseYouTube', () => {
   it.each([
@@ -27,16 +27,16 @@ it('parseYtT', () => {
   expect(parseYtT(null)).toBe(0);
 });
 
-describe('fetchTitle', () => {
-  it('returns the oEmbed title', async () => {
-    const f = vi.fn().mockResolvedValue({ ok: true, json: async () => ({ title: 'Song' }) });
-    expect(await fetchTitle('dQw4w9WgXcQ', f)).toBe('Song');
+describe('fetchOEmbed', () => {
+  it('returns title and channel', async () => {
+    const f = vi.fn().mockResolvedValue({ ok: true, json: async () => ({ title: 'Song', author_name: 'Band - Topic' }) });
+    expect(await fetchOEmbed('dQw4w9WgXcQ', f)).toEqual({ title: 'Song', author: 'Band - Topic' });
     expect(f.mock.calls[0][0]).toContain('oembed');
   });
 
-  it('returns empty string on failure', async () => {
-    expect(await fetchTitle('x', vi.fn().mockResolvedValue({ ok: false }))).toBe('');
-    expect(await fetchTitle('x', vi.fn().mockRejectedValue(new Error('net')))).toBe('');
+  it('returns null on failure', async () => {
+    expect(await fetchOEmbed('x', vi.fn().mockResolvedValue({ ok: false }))).toBeNull();
+    expect(await fetchOEmbed('x', vi.fn().mockRejectedValue(new Error('net')))).toBeNull();
   });
 });
 

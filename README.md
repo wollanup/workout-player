@@ -1,7 +1,12 @@
 # Workout Player (POC)
 
 Lecteur musical pour séances de sport : enchaîne des morceaux (YouTube / YT Music ou MP3 locaux)
-pendant une durée fixe, avec pauses, décompte bipé qui accélère, fondu de fin et départ à un timestamp.
+pendant une durée fixe, avec pauses, décompte bipé (2 noires + 4 croches, 220 Hz), fondu de fin et départ à un timestamp.
+
+- Durées saisies en min / s avec boutons -/+ (pas de 5 s), pas de format « m:ss » à taper.
+- Analyse de chaque morceau : durée réelle et libellé « Artiste - Titre » (tags ID3 pour les fichiers,
+  lecteur YouTube + oEmbed pour les vidéos) ; alerte si l'étape dépasse la fin du morceau, avec ajustement en un clic.
+- Préchargement du morceau suivant pendant les pauses.
 
 ## Démarrage
 

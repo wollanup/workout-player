@@ -33,14 +33,16 @@ export function parseYouTube(input) {
   return out;
 }
 
-export async function fetchTitle(videoId, fetchImpl = globalThis.fetch) {
+/** Title + channel name through oEmbed (no API key, CORS enabled). Null on failure. */
+export async function fetchOEmbed(videoId, fetchImpl = globalThis.fetch) {
   try {
     const watch = 'https://www.youtube.com/watch?v=' + videoId;
     const res = await fetchImpl(`https://www.youtube.com/oembed?format=json&url=${encodeURIComponent(watch)}`);
-    if (!res.ok) return '';
-    return (await res.json()).title || '';
+    if (!res.ok) return null;
+    const { title = '', author_name: author = '' } = await res.json();
+    return { title, author };
   } catch {
-    return '';
+    return null;
   }
 }
 

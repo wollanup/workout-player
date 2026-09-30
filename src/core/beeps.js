@@ -1,32 +1,40 @@
-/** Seconds-before-end at which to beep: 1 s apart at first, then accelerating. */
-export function beepTimes(countdown, { factor = 0.8, minGap = 0.12 } = {}) {
-  const ts = [];
-  let t = countdown, gap = 1;
-  while (t > 0.15) {
-    ts.push(t);
-    t -= gap;
-    gap = Math.max(minGap, gap * factor);
-  }
-  return ts;
+/**
+ * Countdown rhythm, in beats before the end of the step: 2 quarter notes, 4 eighth notes,
+ * then the transition lands on the next downbeat.
+ */
+export const BEEP_FREQ = 220;
+export const BEEP_PATTERN = [
+  { beats: 4, len: 0.35 }, // noire
+  { beats: 3, len: 0.35 }, // noire
+  { beats: 2, len: 0.1 }, // croche
+  { beats: 1.5, len: 0.1 },
+  { beats: 1, len: 0.1 },
+  { beats: 0.5, len: 0.1 },
+];
+const PATTERN_BEATS = BEEP_PATTERN[0].beats;
+const FINAL = { len: 0.5, vol: 0.3 };
+
+/** One beat = 1 s, squeezed when the countdown is shorter than the pattern. */
+export const beatLength = countdown => Math.min(1, countdown / PATTERN_BEATS);
+
+/** Seconds-before-end of each countdown beep (final beep at 0 excluded). */
+export function beepTimes(countdown) {
+  const beat = beatLength(countdown);
+  return BEEP_PATTERN.map(n => n.beats * beat);
 }
 
 /**
- * Beeps to schedule from now, given the remaining time of the step.
- * Pitch rises slightly with the pace (BEEP_RISE semitones); a long beep one octave up marks the transition.
+ * Beeps to schedule from now, given the remaining time of the step. Same pitch for all.
  * @returns {{offset: number, freq: number, len: number, vol: number}[]}
  */
-export const BEEP_BASE_FREQ = 330;
-export const BEEP_RISE = 2;
-export const FINAL_BEEP_FREQ = BEEP_BASE_FREQ * 2;
-
 export function beepPlan(remaining, countdown) {
-  const times = beepTimes(countdown);
+  const beat = beatLength(countdown);
   const plan = [];
-  times.forEach((t, k) => {
-    if (t > remaining + 0.02) return;
-    const semitones = (k / Math.max(1, times.length - 1)) * BEEP_RISE;
-    plan.push({ offset: remaining - t, freq: BEEP_BASE_FREQ * 2 ** (semitones / 12), len: 0.07, vol: 0.25 });
-  });
-  plan.push({ offset: Math.max(0, remaining), freq: FINAL_BEEP_FREQ, len: 0.4, vol: 0.3 });
+  for (const n of BEEP_PATTERN) {
+    const t = n.beats * beat;
+    if (t > remaining + 0.02) continue;
+    plan.push({ offset: remaining - t, freq: BEEP_FREQ, len: Math.min(n.len, beat * 0.8), vol: 0.25 });
+  }
+  plan.push({ offset: Math.max(0, remaining), freq: BEEP_FREQ, ...FINAL });
   return plan;
 }

@@ -4,7 +4,7 @@ import { clamp01 } from '../core/time.js';
 
 /**
  * Media adapter contract (see src/media/*):
- *   load(step, { onPlaying, onError }), pause(), resume(), stop(), setVolume(0..1), stallHint?
+ *   load(step, { onPlaying, onError }), pause(), resume(), stop(), setVolume(0..1), prepare?(step), stallHint?
  * Beeper contract: unlock(), schedule(plan), cancel()
  * WakeLock contract: acquire(), release()
  *
@@ -141,6 +141,10 @@ export class WorkoutEngine {
       status: 'running', idx, duration: +step.duration, remaining: +step.duration,
       ready: !adapter, error: '',
     });
+    // Pre-buffer the next track when its player is idle during this step (rest, other source).
+    const next = steps[idx + 1];
+    const nextAdapter = this.#adapter(next);
+    if (nextAdapter && nextAdapter !== adapter) nextAdapter.prepare?.(next);
     if (!adapter) return;
 
     // If media doesn't start (autoplay blocked, network…), let the timer run anyway.

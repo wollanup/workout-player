@@ -40,27 +40,27 @@ describe('model', () => {
 });
 
 describe('beeps', () => {
-  it('beep times start 1 s apart then accelerate', () => {
-    const t = beepTimes(5);
-    expect(t[0]).toBe(5);
-    expect(t[1]).toBe(4);
-    const gaps = t.slice(1).map((x, i) => t[i] - x);
-    gaps.slice(1).forEach((g, i) => expect(g).toBeLessThanOrEqual(gaps[i] + 1e-9));
-    expect(Math.min(...t)).toBeGreaterThan(0);
+  it('rhythm: 2 quarter notes then 4 eighth notes, 1 s per beat', () => {
+    expect(beepTimes(5)).toEqual([4, 3, 2, 1.5, 1, 0.5]);
+  });
+
+  it('squeezes the rhythm into a short countdown', () => {
+    expect(beepTimes(2)).toEqual([2, 1.5, 1, 0.75, 0.5, 0.25]);
+  });
+
+  it('quarter notes are long, eighth notes short, all at the same pitch', () => {
+    const plan = beepPlan(5, 5);
+    expect(plan.map(b => b.offset)).toEqual([1, 2, 3, 3.5, 4, 4.5, 5]);
+    expect(new Set(plan.map(b => b.freq))).toEqual(new Set([220]));
+    const [q1, q2, ...rest] = plan.slice(0, -1);
+    rest.forEach(e => expect(e.len).toBeLessThan(q1.len));
+    expect(q2.len).toBe(q1.len);
   });
 
   it('plan only contains beeps within the remaining time, ends with a long beep', () => {
     const plan = beepPlan(2, 5);
     expect(plan.every(b => b.offset >= 0 && b.offset <= 2)).toBe(true);
-    expect(plan.at(-1)).toMatchObject({ offset: 2, freq: 660 });
+    expect(plan.at(-1)).toMatchObject({ offset: 2, freq: 220, len: 0.5 });
     expect(beepPlan(0, 5)).toHaveLength(1);
-  });
-
-  it('countdown pitch rises subtly (2 semitones), final beep one octave above the start', () => {
-    const plan = beepPlan(5, 5);
-    const ticks = plan.slice(0, -1).map(b => b.freq);
-    expect(ticks[0]).toBe(330);
-    expect(ticks.at(-1)).toBeCloseTo(330 * 2 ** (2 / 12)); // ~370 Hz
-    ticks.slice(1).forEach((f, i) => expect(f).toBeGreaterThanOrEqual(ticks[i]));
   });
 });

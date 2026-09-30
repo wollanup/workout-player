@@ -14,6 +14,18 @@ export function createYouTubeAdapter(getContainer) {
   let player = null;
   let cb = null;
   let start = 0;
+  let lastError = null;
+  /** Next video buffered (muted, paused) while the player is idle, e.g. during a rest step. */
+  let prepared = null;
+  let queue = Promise.resolve();
+
+  /** Serializes metadata operations (probe, playlist) that drive the single shared player. */
+  function exclusive(fn) {
+    const run = queue.then(fn, fn);
+    queue = run.catch(() => {});
+    return run;
+  }
+  const sleep = ms => new Promise(r => setTimeout(r, ms));
 
   function load() {
     ready ??= new Promise((resolve, reject) => {
@@ -35,7 +47,7 @@ export function createYouTubeAdapter(getContainer) {
           events: {
             onReady: () => resolve(player),
             onStateChange: e => onState(e.data),
-            onError: e => cb?.onError(ytErrorMessage(e.data)),
+            onError: e => { lastError = e.data; cb?.onError(ytErrorMessage(e.data)); },
           },
         });
       };
@@ -53,6 +65,12 @@ export function createYouTubeAdapter(getContainer) {
   }
 
   function onState(st) {
+    if (!cb && prepared?.state === 'loading' && st === PLAYING) {
+      // Buffering started: freeze it until the step begins.
+      player.pauseVideo();
+      prepared.state = 'ready';
+      return;
+    }
     if (!cb) return;
     if (st === PLAYING) {
       if (player.isMuted()) player.unMute();
@@ -68,15 +86,33 @@ export function createYouTubeAdapter(getContainer) {
   return {
     stallHint: 'La vidéo ne démarre pas : touche le lecteur ci-dessous.',
     preload: () => load().catch(() => {}),
+    /** Pre-buffers a step's video while the player is idle; load() then starts instantly. */
+    prepare(step) {
+      if (cb || prepared?.videoId === step.videoId) return;
+      const target = { videoId: step.videoId, state: 'loading' };
+      prepared = target;
+      load().then(p => {
+        if (prepared !== target || cb) return;
+        p.mute();
+        p.loadVideoById({ videoId: step.videoId, startSeconds: +step.start || 0 });
+      }).catch(() => { if (prepared === target) prepared = null; });
+    },
     async load(step, callbacks) {
       cb = callbacks;
       start = +step.start || 0;
+      const reuse = prepared?.videoId === step.videoId;
+      prepared = null;
       try {
         const p = await load();
         if (cb !== callbacks) return;
         p.unMute();
         p.setVolume(100);
-        p.loadVideoById({ videoId: step.videoId, startSeconds: start });
+        if (reuse) {
+          p.seekTo(start, true);
+          p.playVideo();
+        } else {
+          p.loadVideoById({ videoId: step.videoId, startSeconds: start });
+        }
       } catch (err) {
         if (cb === callbacks) callbacks.onError(err.message);
       }
@@ -87,16 +123,39 @@ export function createYouTubeAdapter(getContainer) {
     setVolume: v => safe(() => player?.setVolume(Math.round(v * 100))),
 
     /** Reads a playlist's video IDs through the embedded player (no API key needed). */
-    async playlistIds(list, timeoutMs = 15000) {
+    playlistIds: (list, timeoutMs = 15000) => exclusive(async () => {
+      prepared = null;
       const p = await load();
       p.cuePlaylist({ listType: 'playlist', list });
       const deadline = Date.now() + timeoutMs;
       while (Date.now() < deadline) {
-        await new Promise(r => setTimeout(r, 300));
+        await sleep(300);
         const ids = p.getPlaylist?.();
         if (ids?.length) { p.stopVideo(); return ids; }
       }
       throw new Error('playlist introuvable, vide ou privée.');
-    },
+    }),
+
+    /**
+     * Duration, title and channel of a video, by cueing it (no playback) in the player.
+     * @returns {Promise<{duration: number, title: string, author: string}|null>}
+     */
+    probe: (videoId, timeoutMs = 8000) => exclusive(async () => {
+      if (cb) return null; // never hijack the player during a session
+      prepared = null;
+      const p = await load();
+      lastError = null;
+      p.cueVideoById(videoId);
+      const deadline = Date.now() + timeoutMs;
+      while (Date.now() < deadline && lastError == null) {
+        await sleep(200);
+        const data = p.getVideoData?.();
+        const duration = p.getDuration?.();
+        if (data?.video_id === videoId && duration > 0) {
+          return { duration, title: data.title || '', author: data.author || '' };
+        }
+      }
+      return null;
+    }),
   };
 }
