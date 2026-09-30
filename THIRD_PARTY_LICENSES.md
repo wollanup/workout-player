@@ -20,12 +20,14 @@ Fichier généré par `node scripts/licenses.mjs` (lancé automatiquement avant 
 | [@mantine/modals](https://github.com/mantinedev/mantine) | 9.6.3 | MIT |
 | [@mantine/notifications](https://github.com/mantinedev/mantine) | 9.6.3 | MIT |
 | [@mantine/store](https://github.com/mantinedev/mantine) | 9.6.3 | MIT |
+| [@remix-run/route-pattern](https://github.com/remix-run/remix) | 0.22.1 | MIT |
 | [@tabler/icons](https://github.com/tabler/tabler-icons) | 3.48.0 | MIT |
 | [@tabler/icons-react](https://github.com/tabler/tabler-icons) | 3.48.0 | MIT |
 | [@tokenizer/inflate](https://github.com/Borewit/tokenizer-inflate) | 0.4.1 | MIT |
 | [@tokenizer/token](https://github.com/Borewit/tokenizer-token) | 0.3.0 | MIT |
 | [clsx](lukeed/clsx) | 2.1.1 | MIT |
 | [content-type](jshttp/content-type) | 2.1.0 | MIT |
+| [cookie-es](unjs/cookie-es) | 3.1.1 | MIT |
 | [csstype](https://github.com/frenic/csstype) | 3.2.3 | MIT |
 | [debug](https://github.com/debug-js/debug) | 4.4.3 | MIT |
 | [detect-node-es](https://github.com/thekashey/detect-node) | 1.1.0 | MIT |
@@ -44,6 +46,7 @@ Fichier généré par `node scripts/licenses.mjs` (lancé automatiquement avant 
 | [react-number-format](https://github.com/s-yadav/react-number-format) | 5.4.5 | MIT |
 | [react-remove-scroll](https://github.com/theKashey/react-remove-scroll) | 2.7.2 | MIT |
 | [react-remove-scroll-bar](https://github.com/theKashey/react-remove-scroll-bar) | 2.3.8 | MIT |
+| [react-router](https://github.com/remix-run/react-router) | 8.4.0 | MIT |
 | [react-style-singleton](https://github.com/theKashey/react-style-singleton) | 2.2.3 | MIT |
 | [react-transition-group](https://github.com/reactjs/react-transition-group) | 4.4.5 | BSD-3-Clause |
 | [strtok3](https://github.com/Borewit/strtok3) | 10.3.5 | MIT |

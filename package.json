@@ -50,6 +50,7 @@
     "@tabler/icons-react": "^3.48.0",
     "music-metadata": "^11.16.1",
     "react": "^19.3.0",
-    "react-dom": "^19.3.0"
+    "react-dom": "^19.3.0",
+    "react-router": "^8.4.0"
   }
 }

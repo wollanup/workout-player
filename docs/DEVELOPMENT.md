@@ -27,7 +27,7 @@ src/
   player/      WorkoutEngine : machine à états de la séance, indépendante de l'UI — testée
   media/       adaptateurs : lecteur YouTube, Apple Music (MusicKit JS), audio local, bips Web Audio
   services/    stockage (localStorage + IndexedDB pour les fichiers), wake lock, analyse des morceaux
-  app/         singletons runtime (moteur, médias), thème, providers, modales / notifications
+  app/         singletons runtime (moteur, médias), routes, thème, providers, modales / notifications
   hooks/       useEngineState (useSyncExternalStore), useSessions, useAccent, useSources, useAppleAuth
   components/  écrans React : SessionList, SessionEditor (+ StepCard, PlaylistImport, pickers), PlayerScreen
     shell/     barre d'application, menu (sources, thème, aide)
@@ -50,6 +50,18 @@ src/
 - Préchargement du morceau suivant pendant les pauses.
 - Sauvegarde automatique (debounce 400 ms) ; validation au lancement ; nettoyage des fichiers orphelins
   au retour à la liste.
+
+## Navigation
+
+- React Router en mode hash (`App.jsx`, écrans dans `app/routes.jsx`) : `#/` liste, `#/s/<id>` édition,
+  `#/s/<id>/play` séance. Le hash fonctionne sur GitHub Pages et hors ligne sans réécriture serveur.
+- Recharger la page garde l'écran courant. Une nouvelle séance pas encore sauvegardée voyage dans l'état
+  de l'historique. Une séance en cours ne peut pas reprendre après rechargement (l'audio exige un geste) :
+  retour à l'écran d'où elle a été lancée.
+- Retour système (bouton / geste Android) : il suit l'historique (édition → liste, liste → quitte l'app).
+  Il ferme d'abord une fenêtre ouverte (picker, menu, confirmation), et demande confirmation avant de
+  quitter une séance en cours (`useBlocker`). Sur iPhone, une PWA installée n'a pas de geste retour :
+  boutons de l'UI.
 
 ## YouTube
 
@@ -120,6 +132,9 @@ site chaque mois pour le renouveler. Sans secrets, le build passe et Apple Music
 ## PWA
 
 - `public/manifest.webmanifest`, `public/sw.js` (network-first, cache pour le hors ligne), enregistré en production.
+- Mises à jour : GitHub Pages envoie `max-age=600`, le SW revalide donc les fichiers non hashés
+  (`cache: 'no-cache'`). Un nouveau déploiement installe un nouveau SW, qui prend la main aussitôt ; la
+  page se recharge alors d'elle-même (sauf pendant une séance). Le SW est revérifié à chaque retour sur l'app.
 - Icônes générées depuis `public/icon.svg` et `public/icon-maskable.svg` :
   `npm i --no-save sharp && node scripts/icons.mjs` (les PNG sont versionnés).
 
