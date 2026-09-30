@@ -158,6 +158,10 @@ Mise en place (déjà faite, pour mémoire) :
 
 ## Licences
 
-Le projet est sous licence MIT (`LICENSE`). `scripts/licenses.mjs` recense les dépendances d'exécution,
+Le projet est sous licence GNU AGPL v3 ou ultérieure (`LICENSE`, SPDX `AGPL-3.0-or-later`). Une version
+modifiée et mise en ligne (fork déployé) doit offrir son code source à ses utilisateurs : garder le lien
+« Code source » du menu Aide, pointé vers le fork. Les versions publiées jusqu'au 30 septembre 2026 (commit `ae0177e`) restent disponibles sous licence MIT.
+
+`scripts/licenses.mjs` recense les dépendances d'exécution,
 refuse toute licence hors liste blanche (build en échec) et produit `THIRD_PARTY_LICENSES.md` et
 `public/licenses.txt` (textes complets, servis avec l'app).

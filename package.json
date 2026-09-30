@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.1.0",
   "description": "Lecteur musical pour séances de sport : morceaux minutés, pauses et décomptes bipés.",
-  "license": "MIT",
+  "license": "AGPL-3.0-or-later",
   "homepage": "https://app.workout.stemux.fr",
   "repository": {
     "type": "git",
