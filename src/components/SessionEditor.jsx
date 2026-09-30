@@ -3,24 +3,47 @@ import {
   ActionIcon, Button, FileButton, Group, NumberInput, Paper, SimpleGrid, Stack, Text, TextInput,
 } from '@mantine/core';
 import {
-  IconArrowLeft, IconBrandYoutube, IconDeviceFloppy, IconFileMusic, IconPlayerPause,
+  IconArrowLeft, IconBrandYoutube, IconCloudCheck, IconCloudUp, IconFileMusic, IconPlayerPause, IconPlayerPlayFilled,
 } from '@tabler/icons-react';
 import { StepCard } from './StepCard.jsx';
 import { PlaylistImport } from './PlaylistImport.jsx';
 import { DurationBadge } from './DurationBadge.jsx';
-import { newMusic, newPause, totalDuration, uid, validateSession } from '../core/model.js';
+import { newMusic, newPause, totalDuration, uid } from '../core/model.js';
 import { FileStore } from '../services/storage.js';
 import { plural } from '../core/plural.js';
 import { localTrackInfo, youTubeTrackInfo } from '../services/trackInfo.js';
-import { confirm, notifyError } from '../app/feedback.jsx';
+import { notifyError } from '../app/feedback.jsx';
 
-export function SessionEditor({ session, youtube, onSave, onClose }) {
+const AUTOSAVE_MS = 400;
+
+/** Edits a session; every change is saved automatically (debounced, flushed when leaving). */
+export function SessionEditor({ session, youtube, onSave, onClose, onPlay }) {
   const [draft, setDraft] = useState(() => structuredClone(session));
   const [dirty, setDirty] = useState(false);
+  const [saved, setSaved] = useState(true);
+
+  // Autosave. `pending` holds the unsaved draft so leaving the editor can flush it.
+  const pending = useRef(null);
+  const saveRef = useRef(onSave);
+  useEffect(() => { saveRef.current = onSave; });
+  useEffect(() => {
+    if (!dirty) return;
+    pending.current = draft;
+    const t = setTimeout(() => {
+      pending.current = null;
+      saveRef.current(draft);
+      setSaved(true);
+    }, AUTOSAVE_MS);
+    return () => clearTimeout(t);
+  }, [draft, dirty]);
+  useEffect(() => () => { if (pending.current) saveRef.current(pending.current, { leaving: true }); }, []);
 
   const [analyzing, setAnalyzing] = useState(() => new Set());
 
-  const update = (fn, markDirty = true) => { setDraft(d => fn(structuredClone(d))); if (markDirty) setDirty(true); };
+  const update = (fn, markDirty = true) => {
+    setDraft(d => fn(structuredClone(d)));
+    if (markDirty) { setDirty(true); setSaved(false); }
+  };
   const setField = (field, value) => update(d => ({ ...d, [field]: value }));
   const updateStep = (id, patch, markDirty = true) =>
     update(d => ({ ...d, steps: d.steps.map(s => s.id === id ? { ...s, ...patch } : s) }), markDirty);
@@ -95,29 +118,22 @@ export function SessionEditor({ session, youtube, onSave, onClose }) {
     }
   }
 
-  async function back() {
-    if (!dirty || await confirm({ title: 'Quitter sans enregistrer ?', confirmLabel: 'Quitter', danger: true })) onClose();
-  }
-
-  async function save() {
-    const d = { ...draft, name: draft.name.trim() || 'Séance' };
-    const errors = validateSession(d);
-    if (errors.length) return notifyError(errors.join('\n'), 'Séance incomplète');
-    await onSave(d);
-  }
 
   return (
     <Stack gap="md">
       <Paper className="sticky-bar" py="sm">
         <Group justify="space-between" wrap="nowrap">
           <Group gap={6} wrap="nowrap" miw={0}>
-            <ActionIcon variant="subtle" size="lg" onClick={back} aria-label="Retour">
+            <ActionIcon variant="subtle" size="lg" onClick={onClose} aria-label="Retour">
               <IconArrowLeft />
             </ActionIcon>
             <DurationBadge seconds={totalDuration(draft)} data-testid="total" />
             <Text size="sm" c="dimmed" truncate>{plural(draft.steps.length, 'étape')}</Text>
+            {saved
+              ? <IconCloudCheck size={18} color="var(--mantine-color-dimmed)" aria-label="Enregistré" style={{ flexShrink: 0 }} />
+              : <IconCloudUp size={18} color="var(--mantine-color-dimmed)" aria-label="Enregistrement…" style={{ flexShrink: 0 }} />}
           </Group>
-          <Button leftSection={<IconDeviceFloppy size={20} />} onClick={save} px="sm" style={{ flexShrink: 0 }}>Enregistrer</Button>
+          <Button leftSection={<IconPlayerPlayFilled size={18} />} onClick={() => onPlay(draft)} px="sm" style={{ flexShrink: 0 }}>Lancer</Button>
         </Group>
       </Paper>
 

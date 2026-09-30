@@ -7,6 +7,7 @@ pendant une durée fixe, avec pauses, décompte bipé (2 noires + 4 croches, 220
 - Analyse de chaque morceau : durée réelle et libellé « Artiste - Titre » (tags ID3 pour les fichiers,
   lecteur YouTube + oEmbed pour les vidéos) ; alerte si l'étape dépasse la fin du morceau, avec ajustement en un clic.
 - Préchargement du morceau suivant pendant les pauses.
+- Sauvegarde automatique à chaque modification (pas de bouton Enregistrer) ; la validation se fait au lancement.
 
 ## Démarrage
 

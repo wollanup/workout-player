@@ -30,7 +30,7 @@ export function SessionList({ sessions, onNew, onEdit, onPlay, onDuplicate, onRe
         <Card key={s.id} withBorder radius="md" padding="md">
           <Group justify="space-between" wrap="nowrap">
             <Stack gap={6} style={{ minWidth: 0 }}>
-              <Text fw={600} size="lg" truncate>{s.name}</Text>
+              <Text fw={600} size="lg" truncate>{s.name.trim() || 'Sans nom'}</Text>
               <Group gap="xs">
                 <DurationBadge seconds={totalDuration(s)} />
                 <Text size="sm" c="dimmed">

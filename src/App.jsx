@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Container } from '@mantine/core';
 import { Providers } from './app/Providers.jsx';
 import { SessionList } from './components/SessionList.jsx';
@@ -7,8 +7,8 @@ import { PlayerScreen } from './components/PlayerScreen.jsx';
 import { useSessions } from './hooks/useSessions.js';
 import { useEngineState } from './hooks/useEngineState.js';
 import { engine, youtube, YT_HOST_ID } from './app/runtime.js';
-import { newSession } from './core/model.js';
-import { notifySuccess } from './app/feedback.jsx';
+import { newSession, validateSession } from './core/model.js';
+import { notifyError } from './app/feedback.jsx';
 
 /** Hosts the YouTube iframe. Always mounted (media survives view changes); only visible while playing. */
 function YouTubeHost({ visible }) {
@@ -20,8 +20,18 @@ function YouTubeHost({ visible }) {
 }
 
 export function App() {
-  const { sessions, save, remove, duplicate } = useSessions();
+  const { sessions, save, remove, duplicate, gc } = useSessions();
   const [view, setView] = useState({ name: 'list' });
+  // Autosave keeps incomplete sessions, so check before playing.
+  const play = s => {
+    const errors = validateSession(s);
+    if (errors.length) return notifyError(errors.join('\n'), 'Séance incomplète');
+    setView({ name: 'play' });
+    engine.start(s);
+  };
+
+  // Back on the list = the editor has flushed its autosave (unmount cleanup runs first): drop orphan files.
+  useEffect(() => { if (view.name === 'list') gc(); }, [view.name, gc]);
   const toList = () => setView({ name: 'list' });
 
   return (
@@ -32,7 +42,7 @@ export function App() {
             sessions={sessions}
             onNew={() => setView({ name: 'edit', session: newSession() })}
             onEdit={s => setView({ name: 'edit', session: s })}
-            onPlay={s => { setView({ name: 'play' }); engine.start(s); }}
+            onPlay={play}
             onDuplicate={duplicate}
             onRemove={remove}
           />
@@ -43,7 +53,8 @@ export function App() {
             session={view.session}
             youtube={youtube}
             onClose={toList}
-            onSave={async s => { await save(s); notifySuccess('Séance enregistrée'); toList(); }}
+            onSave={save}
+            onPlay={s => { save(s); play(s); }}
           />
         )}
         {view.name === 'play' && <PlayerScreen engine={engine} onExit={toList} />}

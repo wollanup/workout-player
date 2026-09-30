@@ -7,9 +7,9 @@ export function useSessions() {
   const [sessions, setSessions] = useState(() => SessionStore.all());
   const refresh = useCallback(() => setSessions(SessionStore.all()), []);
 
-  const save = useCallback(async session => {
+  // No file GC here: autosave runs while files may be stored but not yet referenced.
+  const save = useCallback(session => {
     SessionStore.upsert(session);
-    await gcFiles();
     refresh();
   }, [refresh]);
 
@@ -28,5 +28,5 @@ export function useSessions() {
     refresh();
   }, [refresh]);
 
-  return { sessions, save, remove, duplicate };
+  return { sessions, save, remove, duplicate, gc: gcFiles };
 }

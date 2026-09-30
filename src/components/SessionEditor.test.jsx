@@ -67,35 +67,45 @@ describe('SessionEditor', () => {
   it('fills missing track durations on open without marking the session dirty', async () => {
     youtube.probe.mockResolvedValueOnce({ title: 'T', author: 'A', duration: 200 });
     const session = { ...newSession(), steps: [newMusic('yt', { videoId: 'dQw4w9WgXcQ', label: 'Mon titre' })] };
-    const { onClose } = renderEditor(session);
+    const { onClose, onSave } = renderEditor(session);
     expect(await screen.findByTitle('Durée du morceau')).toHaveTextContent('3:20');
     expect(screen.getByDisplayValue('Mon titre')).toBeInTheDocument();
+    await new Promise(r => setTimeout(r, 600));
+    expect(onSave).not.toHaveBeenCalled(); // background analysis is not a user edit
     await userEvent.click(screen.getByRole('button', { name: 'Retour' }));
     expect(onClose).toHaveBeenCalled();
   });
 
-  it('reports validation errors with a notification instead of alert()', async () => {
-    const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {});
+  it('autosaves changes (debounced), without any save button', async () => {
     const { onSave } = renderEditor();
-    await userEvent.click(screen.getByRole('button', { name: 'Enregistrer' }));
-    expect(await screen.findByText('Ajoute au moins une étape.')).toBeInTheDocument();
-    expect(onSave).not.toHaveBeenCalled();
-    expect(alertSpy).not.toHaveBeenCalled();
-  });
-
-  it('saves a valid session', async () => {
-    const session = { ...newSession(), name: 'Jambes', steps: [newMusic('yt', { videoId: 'dQw4w9WgXcQ' })] };
-    const { onSave } = renderEditor(session);
-    await userEvent.click(screen.getByRole('button', { name: 'Enregistrer' }));
-    expect(onSave).toHaveBeenCalledWith(expect.objectContaining({ name: 'Jambes' }));
-  });
-
-  it('asks for confirmation before leaving with unsaved changes', async () => {
-    const { onClose } = renderEditor();
+    expect(screen.queryByRole('button', { name: 'Enregistrer' })).not.toBeInTheDocument();
     await userEvent.click(screen.getByRole('button', { name: 'Pause' }));
-    await userEvent.click(screen.getByRole('button', { name: 'Retour' }));
-    expect(onClose).not.toHaveBeenCalled();
-    await userEvent.click(await screen.findByRole('button', { name: 'Quitter' }));
-    await waitFor(() => expect(onClose).toHaveBeenCalled());
+    await userEvent.click(screen.getByRole('button', { name: 'Pause' }));
+    await waitFor(() => expect(onSave).toHaveBeenCalled());
+    expect(onSave).toHaveBeenCalledTimes(1);
+    expect(onSave.mock.lastCall[0].steps).toHaveLength(2);
+    expect(screen.getByLabelText('Enregistré')).toBeInTheDocument();
+  });
+
+  it('flushes a pending change when leaving', async () => {
+    const { onSave } = renderEditor();
+    await userEvent.click(screen.getByRole('button', { name: 'Pause' }));
+    cleanup();
+    expect(onSave).toHaveBeenCalledWith(expect.objectContaining({ steps: [expect.any(Object)] }), { leaving: true });
+  });
+
+  it('does not save an untouched session', async () => {
+    const { onSave } = renderEditor();
+    await new Promise(r => setTimeout(r, 600));
+    cleanup();
+    expect(onSave).not.toHaveBeenCalled();
+  });
+
+  it('launches the current draft', async () => {
+    const onPlay = vi.fn();
+    const session = { ...newSession(), name: 'Jambes', steps: [newMusic('yt', { videoId: 'dQw4w9WgXcQ' })] };
+    renderEditor(session, { onPlay });
+    await userEvent.click(screen.getByRole('button', { name: 'Lancer' }));
+    expect(onPlay).toHaveBeenCalledWith(expect.objectContaining({ name: 'Jambes' }));
   });
 });
