@@ -2,7 +2,7 @@
 
 ## Éditeur et hébergement
 
-- Workout Player est un projet personnel, non commercial et open source (licence MIT),
+- Workout Player est un projet personnel, non commercial et open source (licence GNU AGPL v3),
   publié par [wollanup](https://github.com/wollanup).
 - Code source : https://github.com/wollanup/workout-player
 - Hébergeur : GitHub, Inc. (GitHub Pages), 88 Colin P Kelly Jr St, San Francisco, CA 94107, États-Unis.
@@ -47,6 +47,6 @@ Les fichiers importés restent privés, sur ton appareil. À toi d'utiliser des 
 
 ## Licences
 
-- Workout Player : [licence MIT](../LICENSE).
+- Workout Player : [GNU AGPL v3 ou ultérieure](../LICENSE). Les versions publiées jusqu'au 30 septembre 2026 (commit `ae0177e`) restent disponibles sous licence MIT.
 - Bibliothèques tierces : [THIRD_PARTY_LICENSES.md](../THIRD_PARTY_LICENSES.md) ;
   textes complets servis avec l'application (`/licenses.txt`).

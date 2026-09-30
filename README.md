@@ -131,8 +131,12 @@ Pour lancer le projet en local et comprendre son architecture, voir la
 
 ## Licence
 
-[MIT](LICENSE). Les bibliothèques utilisées et leurs licences sont listées dans
-[THIRD_PARTY_LICENSES.md](THIRD_PARTY_LICENSES.md).
+[GNU AGPL v3](LICENSE) (ou version ultérieure). Utilise-le, modifie-le, partage-le librement : la seule
+règle, c'est que toute version modifiée, distribuée ou mise en ligne doit publier son code source sous la
+même licence. Personne ne peut donc en faire une app fermée et payante.
+
+Les versions publiées jusqu'au 30 septembre 2026 (commit `ae0177e`) restent disponibles sous licence MIT. Les bibliothèques utilisées et leurs licences sont
+listées dans [THIRD_PARTY_LICENSES.md](THIRD_PARTY_LICENSES.md).
 
 Workout Player n'est affilié ni à YouTube / Google, ni à Apple. YouTube est une marque de Google LLC,
 Apple Music une marque d'Apple Inc.

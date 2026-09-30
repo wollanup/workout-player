@@ -9,8 +9,27 @@ import { join } from 'node:path';
 const ALLOWED = new Set(['MIT', 'ISC', '0BSD', 'BSD-2-Clause', 'BSD-3-Clause', 'Apache-2.0', '(MIT OR CC0-1.0)']);
 
 // Some MIT packages ship no LICENSE file: use the standard text with the author from package.json.
-const mitText = author => readFileSync('LICENSE', 'utf8').trim()
-  .replace(/^Copyright .*$/m, `Copyright (c) ${author ?? 'the package authors'}`);
+const mitText = author => `MIT License
+
+Copyright (c) ${author ?? 'the package authors'}
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.`;
 
 const tree = JSON.parse(execSync('npm ls --omit=dev --all --json', { encoding: 'utf8', maxBuffer: 1e8 }));
 const pkgs = new Map();
@@ -60,7 +79,18 @@ ${list.map(p => `| ${p.url ? `[${p.name}](${p.url})` : p.name} | ${p.version} | 
   dans l'application) et soumis aux conditions d'Apple.
 `);
 
-const own = readFileSync('LICENSE', 'utf8').trim();
+const own = `Copyright (C) 2026 wollanup
+Source code: https://github.com/wollanup/workout-player
+
+This program is free software: you can redistribute it and/or modify it under the terms of the
+GNU Affero General Public License as published by the Free Software Foundation, either version 3
+of the License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+Affero General Public License below for more details.
+
+${readFileSync('LICENSE', 'utf8').trim()}`;
 const sep = '-'.repeat(72);
 writeFileSync(join('public', 'licenses.txt'), [
   'Workout Player', '', own, '', sep, 'Third-party software included in this application', sep,
