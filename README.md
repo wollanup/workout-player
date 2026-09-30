@@ -24,17 +24,23 @@ allumé (Wake Lock) et le service worker. PC et téléphone doivent être sur le
 - Playlists : publiques ou non répertoriées uniquement ; certains clips interdisent la lecture intégrée (erreurs 101/150).
 - Lecture YouTube = écran allumé obligatoire. Les MP3 locaux fonctionnent écran éteint et hors ligne.
 
+## Stack
+
+React 19 + Mantine 9 (UI, modales, notifications) + Tabler Icons (SVG), Vite, Vitest + Testing Library, ESLint.
+
 ## Architecture
 
 ```
 src/
-  core/      logique pure, sans DOM (temps, parsing YouTube, modèle de séance, plan des bips) — testée
-  player/    WorkoutEngine : machine à états de la séance, UI-agnostique (subscribe/getState) — testée
-  media/     adaptateurs : lecteur YouTube, audio local, bips Web Audio
-  services/  stockage (localStorage + IndexedDB pour les fichiers), wake lock
-  ui/        vues DOM vanilla (liste, éditeur, lecture) — seule couche à remplacer pour passer à React
-  main.js    câblage
+  core/        logique pure, sans DOM (temps, parsing YouTube, modèle de séance, plan des bips) — testée
+  player/      WorkoutEngine : machine à états de la séance, indépendante de l'UI — testée
+  media/       adaptateurs : lecteur YouTube, audio local, bips Web Audio
+  services/    stockage (localStorage + IndexedDB pour les fichiers), wake lock
+  app/         singletons runtime (moteur, médias), thème, providers, modales / notifications
+  hooks/       useEngineState (useSyncExternalStore), useSessions
+  components/  écrans React : SessionList, SessionEditor (+ StepCard, PlaylistImport), PlayerScreen
 ```
 
-Migration React : `engine.subscribe` / `engine.getState` se branchent directement sur
-`useSyncExternalStore`; `core`, `player`, `media` et `services` restent inchangés.
+Le moteur et les médias vivent hors de React (ils doivent survivre aux changements d'écran) ;
+les composants s'y abonnent via `useEngineState`. Pas d'`alert()`/`confirm()` : `app/feedback.jsx`.
+Sur mobile, la taille de base (rem) est augmentée de 12,5 % (`src/app.css`), toute l'UI suit.

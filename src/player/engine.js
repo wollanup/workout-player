@@ -41,10 +41,11 @@ export class WorkoutEngine {
     this.state = IDLE;
   }
 
-  subscribe(fn) {
+  // Arrow fields: stable references usable directly by React's useSyncExternalStore.
+  subscribe = fn => {
     this.#listeners.add(fn);
-    return () => this.#listeners.delete(fn);
-  }
+    return () => { this.#listeners.delete(fn); };
+  };
 
   getState = () => this.state;
 

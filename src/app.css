@@ -1,0 +1,54 @@
+/* Everything in Mantine is rem-based: bumping the root size scales the whole UI on phones. */
+@media (max-width: $mantine-breakpoint-sm) {
+  html {
+    font-size: 112.5%;
+  }
+}
+
+.nowrap {
+  white-space: nowrap;
+}
+
+.sticky-bar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: var(--mantine-color-body);
+  border-bottom: 1px solid var(--mantine-color-default-border);
+  border-radius: 0;
+}
+
+.timer {
+  font-size: clamp(5rem, 28vw, 10rem);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  transition: opacity 150ms;
+}
+
+/* The YouTube player must be visible while a YouTube step plays (ToS); otherwise it is kept
+   rendered off-screen (not display:none) so the iframe keeps working. */
+.yt-wrap {
+  aspect-ratio: 16 / 9;
+  width: 100%;
+  margin-top: var(--mantine-spacing-lg);
+  border-radius: var(--mantine-radius-md);
+  overflow: hidden;
+}
+
+.yt-wrap.offscreen {
+  position: fixed;
+  left: -10000px;
+  top: 0;
+  width: 320px;
+}
+
+.yt-wrap.dim {
+  opacity: 0.25;
+}
+
+.yt-host,
+.yt-host iframe {
+  width: 100%;
+  height: 100%;
+}

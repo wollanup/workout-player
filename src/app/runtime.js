@@ -1,0 +1,26 @@
+import { WorkoutEngine } from '../player/engine.js';
+import { createLocalAudioAdapter } from '../media/localAudio.js';
+import { createYouTubeAdapter } from '../media/youtube.js';
+import { createBeeper } from '../media/beeper.js';
+import { createWakeLock } from '../services/wakeLock.js';
+import { FileStore } from '../services/storage.js';
+
+/** DOM id of the element hosting the YouTube iframe (rendered once by <YouTubeHost />). */
+export const YT_HOST_ID = 'yt-host';
+
+/** App-wide singletons: media must survive view changes, so they live outside React. */
+export const youtube = createYouTubeAdapter(() => document.getElementById(YT_HOST_ID));
+
+export const engine = new WorkoutEngine({
+  media: { yt: youtube, local: createLocalAudioAdapter(new Audio(), FileStore.get) },
+  beeper: createBeeper(),
+  wakeLock: createWakeLock(),
+});
+
+// Headset / lock-screen buttons (effective with local audio).
+const ms = typeof navigator !== 'undefined' ? navigator.mediaSession : null;
+const setAction = (a, fn) => { try { ms?.setActionHandler(a, fn); } catch { /* unsupported action */ } };
+setAction('play', () => engine.state.status === 'paused' && engine.togglePause());
+setAction('pause', () => engine.state.status === 'running' && engine.togglePause());
+setAction('nexttrack', () => engine.next());
+setAction('previoustrack', () => engine.prev());

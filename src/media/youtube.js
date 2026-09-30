@@ -8,20 +8,27 @@ const ENDED = 0;
  * Error 153 happens when YouTube gets no Referer: the page must be served over http(s)
  * with a referrer policy that sends the origin (see <meta name="referrer"> in index.html).
  */
-export function createYouTubeAdapter(elementId) {
+/** @param {() => HTMLElement|null} getContainer element that will host the player iframe */
+export function createYouTubeAdapter(getContainer) {
   let ready = null;
   let player = null;
   let cb = null;
   let start = 0;
 
   function load() {
-    return ready ??= new Promise((resolve, reject) => {
+    ready ??= new Promise((resolve, reject) => {
       if (location.protocol === 'file:') {
-        ready = null;
         return reject(new Error(ytErrorMessage(153)));
       }
-      window.onYouTubeIframeAPIReady = () => {
-        player = new YT.Player(elementId, {
+      const create = () => {
+        const host = getContainer();
+        if (!host) {
+          return reject(new Error('Lecteur YouTube non monté.'));
+        }
+        // Imperative child: React never renders inside the host, so YT can replace it with its iframe.
+        const el = document.createElement('div');
+        host.replaceChildren(el);
+        player = new YT.Player(el, {
           width: '100%',
           height: '100%',
           playerVars: { playsinline: 1, rel: 0, origin: location.origin },
@@ -32,11 +39,17 @@ export function createYouTubeAdapter(elementId) {
           },
         });
       };
+      if (window.YT?.Player) return create();
+      window.onYouTubeIframeAPIReady = create;
       const s = document.createElement('script');
       s.src = 'https://www.youtube.com/iframe_api';
-      s.onerror = () => { ready = null; reject(new Error('API YouTube injoignable (hors ligne ?)')); };
+      s.onerror = () => { s.remove(); reject(new Error('API YouTube injoignable (hors ligne ?)')); };
       document.head.append(s);
+    }).catch(err => {
+      ready = null; // allow retry
+      throw err;
     });
+    return ready;
   }
 
   function onState(st) {
