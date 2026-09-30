@@ -2,7 +2,7 @@
  * Countdown rhythm, in beats before the end of the step: 2 quarter notes, 4 eighth notes,
  * then the transition lands on the next downbeat.
  */
-export const BEEP_FREQ = 220;
+export const BEEP_FREQ = 300;
 export const BEEP_PATTERN = [
   { beats: 4, len: 0.35 }, // noire
   { beats: 3, len: 0.35 }, // noire

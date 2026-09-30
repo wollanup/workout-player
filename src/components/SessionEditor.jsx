@@ -1,11 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
 import {
-  ActionIcon, Button, FileButton, Group, NumberInput, Paper, SimpleGrid, Stack, Text, TextInput,
+  ActionIcon, Button, FileButton, Group, Paper, SimpleGrid, Stack, Text, TextInput,
 } from '@mantine/core';
 import {
-  IconArrowLeft, IconBrandYoutube, IconCloudCheck, IconCloudUp, IconFileMusic, IconPlayerPause, IconPlayerPlayFilled,
+  IconArrowLeft, IconBrandYoutube, IconCloudCheck, IconCloudUp, IconFileMusic, IconPlayerPause, IconPlayerPlayFilled, IconVolume,
 } from '@tabler/icons-react';
 import { StepCard } from './StepCard.jsx';
+import { SecondsInput } from './SecondsInput.jsx';
+import { beepPlan } from '../core/beeps.js';
 import { PlaylistImport } from './PlaylistImport.jsx';
 import { DurationBadge } from './DurationBadge.jsx';
 import { newMusic, newPause, totalDuration, uid } from '../core/model.js';
@@ -17,7 +19,7 @@ import { notifyError } from '../app/feedback.jsx';
 const AUTOSAVE_MS = 400;
 
 /** Edits a session; every change is saved automatically (debounced, flushed when leaving). */
-export function SessionEditor({ session, youtube, onSave, onClose, onPlay }) {
+export function SessionEditor({ session, youtube, beeper, onSave, onClose, onPlay }) {
   const [draft, setDraft] = useState(() => structuredClone(session));
   const [dirty, setDirty] = useState(false);
   const [saved, setSaved] = useState(true);
@@ -39,6 +41,14 @@ export function SessionEditor({ session, youtube, onSave, onClose, onPlay }) {
   useEffect(() => () => { if (pending.current) saveRef.current(pending.current, { leaving: true }); }, []);
 
   const [analyzing, setAnalyzing] = useState(() => new Set());
+
+  /** Plays the end-of-step countdown as it will sound during the session. */
+  function previewBeeps(countdown) {
+    if (!beeper) return;
+    beeper.cancel();
+    beeper.schedule(beepPlan(countdown, countdown));
+  }
+  useEffect(() => () => beeper?.cancel(), [beeper]);
 
   const update = (fn, markDirty = true) => {
     setDraft(d => fn(structuredClone(d)));
@@ -139,10 +149,20 @@ export function SessionEditor({ session, youtube, onSave, onClose, onPlay }) {
 
       <TextInput label="Nom" value={draft.name} onChange={e => setField('name', e.currentTarget.value)} />
       <SimpleGrid cols={2}>
-        <NumberInput label="Décompte départ (s)" min={0} max={60} allowDecimal={false}
-          value={draft.lead} onChange={v => setField('lead', Math.max(0, +v || 0))} />
-        <NumberInput label="Bips avant fin (s)" min={0} max={15} allowDecimal={false}
-          value={draft.countdown} onChange={v => setField('countdown', Math.max(0, +v || 0))} />
+        <SecondsInput label="Décompte départ" max={60} value={draft.lead} onChange={v => setField('lead', v)} />
+        <Group gap={6} wrap="nowrap" align="flex-end">
+          <SecondsInput label="Bips avant fin" max={15} value={draft.countdown} onChange={v => setField('countdown', v)}
+            style={{ flex: 1, minWidth: 0 }}
+            extra={d => (
+              <Button variant="light" leftSection={<IconVolume size={18} />} disabled={!d} onClick={() => previewBeeps(d)}>
+                Écouter
+              </Button>
+            )} />
+          <ActionIcon variant="light" size="input-sm" disabled={!draft.countdown} onClick={() => previewBeeps(draft.countdown)}
+            aria-label="Écouter les bips">
+            <IconVolume size={20} />
+          </ActionIcon>
+        </Group>
       </SimpleGrid>
 
       {draft.steps.length === 0 && <Text c="dimmed">Aucune étape : ajoute des morceaux et des pauses.</Text>}

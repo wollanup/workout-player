@@ -11,9 +11,11 @@ export const YT_HOST_ID = 'yt-host';
 /** App-wide singletons: media must survive view changes, so they live outside React. */
 export const youtube = createYouTubeAdapter(() => document.getElementById(YT_HOST_ID));
 
+export const beeper = createBeeper();
+
 export const engine = new WorkoutEngine({
   media: { yt: youtube, local: createLocalAudioAdapter(new Audio(), FileStore.get) },
-  beeper: createBeeper(),
+  beeper,
   wakeLock: createWakeLock(),
 });
 

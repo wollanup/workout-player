@@ -1,6 +1,6 @@
-import { Accordion, ActionIcon, Button, Card, Group, List, Stack, Text, Title } from '@mantine/core';
+import { ActionIcon, Button, Card, Group, Stack, Text, Title } from '@mantine/core';
 import {
-  IconBarbell, IconCopy, IconHelpCircle, IconListNumbers, IconPencil, IconPlayerPlayFilled, IconPlus, IconTrash,
+  IconCopy, IconListNumbers, IconPencil, IconPlayerPlayFilled, IconPlus, IconTrash,
 } from '@tabler/icons-react';
 import { DurationBadge } from './DurationBadge.jsx';
 import { totalDuration } from '../core/model.js';
@@ -17,10 +17,7 @@ export function SessionList({ sessions, onNew, onEdit, onPlay, onDuplicate, onRe
   return (
     <Stack gap="md">
       <Group justify="space-between">
-        <Group gap="xs">
-          <IconBarbell size={32} color="var(--mantine-color-green-5)" />
-          <Title order={1} size="h2">Workout Player</Title>
-        </Group>
+        <Title order={2} size="h3">Séances</Title>
         <Button leftSection={<IconPlus size={20} />} onClick={onNew}>Nouvelle séance</Button>
       </Group>
 
@@ -50,20 +47,6 @@ export function SessionList({ sessions, onNew, onEdit, onPlay, onDuplicate, onRe
         </Card>
       ))}
 
-      <Accordion variant="contained" radius="md">
-        <Accordion.Item value="help">
-          <Accordion.Control icon={<IconHelpCircle size={20} />}>Aide</Accordion.Control>
-          <Accordion.Panel>
-            <List size="sm" spacing="xs">
-              <List.Item><b>YouTube</b> : colle l’URL d’une vidéo (youtube.com, music.youtube.com, youtu.be). Connecte-toi à YouTube dans ce navigateur pour profiter de Premium (sans pub).</List.Item>
-              <List.Item><b>Playlist</b> : publique ou non répertoriée uniquement (les playlists privées, comme « J’aime », ne sont pas lisibles par le lecteur intégré).</List.Item>
-              <List.Item>Certains clips interdisent la lecture intégrée : le lecteur l’indique et le temps continue.</List.Item>
-              <List.Item><b>Fichier local</b> : copié dans le stockage du navigateur (hors ligne, écran éteint).</List.Item>
-              <List.Item>Avec YouTube, l’écran reste allumé pendant la séance (nécessite HTTPS).</List.Item>
-            </List>
-          </Accordion.Panel>
-        </Accordion.Item>
-      </Accordion>
     </Stack>
   );
 }

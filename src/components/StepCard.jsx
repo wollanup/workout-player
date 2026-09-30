@@ -1,12 +1,13 @@
 import { useState } from 'react';
 import {
-  ActionIcon, Alert, Anchor, Badge, Button, Card, FileButton, Group, Loader, NumberInput, SimpleGrid, Stack, Text, TextInput,
+  ActionIcon, Alert, Anchor, Badge, Button, Card, FileButton, Group, Loader, SimpleGrid, Stack, Text, TextInput,
 } from '@mantine/core';
 import {
   IconAlertTriangle, IconArrowDown, IconArrowUp, IconBrandYoutube, IconFileMusic,
   IconMusic, IconPlayerPause, IconTrash,
 } from '@tabler/icons-react';
 import { DurationInput } from './DurationInput.jsx';
+import { SecondsInput } from './SecondsInput.jsx';
 import { parseYouTube } from '../core/youtube.js';
 import { trackFit } from '../core/tracks.js';
 import { MUSIC_PRESETS, PAUSE_PRESETS, formatTime } from '../core/time.js';
@@ -138,8 +139,7 @@ export function StepCard({ step, index, isFirst, isLast, analyzing, onChange, on
             />
             <DurationInput label="Début à" min={0} value={step.start} onChange={start => onChange({ start })}
               maxMinutes={step.trackDuration > 0 ? Math.ceil(step.trackDuration / 60) : 10} />
-            <NumberInput label="Fondu" suffix=" s" min={0} max={30} value={step.fade} allowDecimal={false}
-              onChange={v => onChange({ fade: Math.max(0, +v || 0) })} />
+            <SecondsInput label="Fondu" max={30} value={step.fade} onChange={fade => onChange({ fade })} />
           </SimpleGrid>
           <FitWarning step={step} fit={fit} onChange={onChange} />
         </Stack>

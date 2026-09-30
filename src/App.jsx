@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react';
-import { Container } from '@mantine/core';
+import { AppShell, Container } from '@mantine/core';
 import { Providers } from './app/Providers.jsx';
+import { AppHeader } from './components/shell/AppHeader.jsx';
 import { SessionList } from './components/SessionList.jsx';
 import { SessionEditor } from './components/SessionEditor.jsx';
 import { PlayerScreen } from './components/PlayerScreen.jsx';
 import { useSessions } from './hooks/useSessions.js';
 import { useEngineState } from './hooks/useEngineState.js';
-import { engine, youtube, YT_HOST_ID } from './app/runtime.js';
+import { beeper, engine, youtube, YT_HOST_ID } from './app/runtime.js';
 import { newSession, validateSession } from './core/model.js';
 import { notifyError } from './app/feedback.jsx';
 
@@ -36,30 +37,40 @@ export function App() {
 
   return (
     <Providers>
-      <Container size="sm" py="md" pb="xl">
-        {view.name === 'list' && (
-          <SessionList
-            sessions={sessions}
-            onNew={() => setView({ name: 'edit', session: newSession() })}
-            onEdit={s => setView({ name: 'edit', session: s })}
-            onPlay={play}
-            onDuplicate={duplicate}
-            onRemove={remove}
-          />
-        )}
-        {view.name === 'edit' && (
-          <SessionEditor
-            key={view.session.id}
-            session={view.session}
-            youtube={youtube}
-            onClose={toList}
-            onSave={save}
-            onPlay={s => { save(s); play(s); }}
-          />
-        )}
-        {view.name === 'play' && <PlayerScreen engine={engine} onExit={toList} />}
-        <YouTubeHost visible={view.name === 'play'} />
-      </Container>
+      <AppShell header={{ height: 60 }}>
+        <AppShell.Header>
+          <Container size="sm" h="100%" px={0}>
+            <AppHeader onHome={view.name === 'edit' ? toList : undefined} />
+          </Container>
+        </AppShell.Header>
+        <AppShell.Main>
+          <Container size="sm" py="md" pb="xl">
+            {view.name === 'list' && (
+              <SessionList
+                sessions={sessions}
+                onNew={() => setView({ name: 'edit', session: newSession() })}
+                onEdit={s => setView({ name: 'edit', session: s })}
+                onPlay={play}
+                onDuplicate={duplicate}
+                onRemove={remove}
+              />
+            )}
+            {view.name === 'edit' && (
+              <SessionEditor
+                key={view.session.id}
+                session={view.session}
+                youtube={youtube}
+            beeper={beeper}
+                onClose={toList}
+                onSave={save}
+                onPlay={s => { save(s); play(s); }}
+              />
+            )}
+            {view.name === 'play' && <PlayerScreen engine={engine} onExit={toList} />}
+            <YouTubeHost visible={view.name === 'play'} />
+          </Container>
+        </AppShell.Main>
+      </AppShell>
     </Providers>
   );
 }

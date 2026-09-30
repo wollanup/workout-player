@@ -9,6 +9,14 @@
   <title>Workout Player</title>
   <link rel="manifest" href="/manifest.webmanifest">
   <link rel="icon" href="/icon.svg">
+  <script>
+    // Apply the saved color scheme before first paint (Mantine key), avoids a dark/light flash.
+    (function () {
+      var v = localStorage.getItem('mantine-color-scheme-value') || 'dark';
+      if (v === 'auto') v = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      document.documentElement.setAttribute('data-mantine-color-scheme', v);
+    })();
+  </script>
 </head>
 <body>
   <div id="root"></div>

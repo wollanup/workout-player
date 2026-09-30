@@ -22,3 +22,6 @@ export const clamp01 = v => Math.min(1, Math.max(0, v));
 /** Quick-pick durations in the editor (seconds). */
 export const MUSIC_PRESETS = [60, 120, 180, 300];
 export const PAUSE_PRESETS = [10, 20, 30, 60];
+
+/** Short setting in seconds: "5 s", or "Non" for 0 (feature off). */
+export const formatSeconds = v => (v > 0 ? `${v} s` : 'Non');

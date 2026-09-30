@@ -51,7 +51,7 @@ describe('beeps', () => {
   it('quarter notes are long, eighth notes short, all at the same pitch', () => {
     const plan = beepPlan(5, 5);
     expect(plan.map(b => b.offset)).toEqual([1, 2, 3, 3.5, 4, 4.5, 5]);
-    expect(new Set(plan.map(b => b.freq))).toEqual(new Set([220]));
+    expect(new Set(plan.map(b => b.freq))).toEqual(new Set([300]));
     const [q1, q2, ...rest] = plan.slice(0, -1);
     rest.forEach(e => expect(e.len).toBeLessThan(q1.len));
     expect(q2.len).toBe(q1.len);
@@ -60,7 +60,7 @@ describe('beeps', () => {
   it('plan only contains beeps within the remaining time, ends with a long beep', () => {
     const plan = beepPlan(2, 5);
     expect(plan.every(b => b.offset >= 0 && b.offset <= 2)).toBe(true);
-    expect(plan.at(-1)).toMatchObject({ offset: 2, freq: 220, len: 0.5 });
+    expect(plan.at(-1)).toMatchObject({ offset: 2, freq: 300, len: 0.5 });
     expect(beepPlan(0, 5)).toHaveLength(1);
   });
 });

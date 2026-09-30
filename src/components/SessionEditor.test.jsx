@@ -5,12 +5,14 @@ import userEvent from '@testing-library/user-event';
 import { Providers } from '../app/Providers.jsx';
 import { SessionEditor } from './SessionEditor.jsx';
 import { newMusic, newSession } from '../core/model.js';
+import { beepPlan } from '../core/beeps.js';
 
 const youtube = { playlistIds: vi.fn(), probe: vi.fn(async () => null) };
+const beeper = { schedule: vi.fn(), cancel: vi.fn() };
 const renderEditor = (session = newSession(), props = {}) => {
   const onSave = vi.fn();
   const onClose = vi.fn();
-  render(<Providers><SessionEditor session={session} youtube={youtube} onSave={onSave} onClose={onClose} {...props} /></Providers>);
+  render(<Providers><SessionEditor session={session} youtube={youtube} beeper={beeper} onSave={onSave} onClose={onClose} {...props} /></Providers>);
   return { onSave, onClose };
 };
 
@@ -74,6 +76,32 @@ describe('SessionEditor', () => {
     expect(onSave).not.toHaveBeenCalled(); // background analysis is not a user edit
     await userEvent.click(screen.getByRole('button', { name: 'Retour' }));
     expect(onClose).toHaveBeenCalled();
+  });
+
+  it('sets countdown / beeps with a wheel, 0 shown as "Non"', async () => {
+    renderEditor();
+    expect(screen.getByRole('button', { name: 'Décompte départ : 5 s' })).toHaveTextContent('5 s');
+    await userEvent.click(screen.getByRole('button', { name: 'Bips avant fin : 5 s' }));
+    await userEvent.click(await screen.findByText('Non'));
+    expect(screen.getByTestId('Bips avant fin-value')).toHaveTextContent('Non');
+    await userEvent.click(screen.getByRole('button', { name: 'Valider' }));
+    expect(screen.getByRole('button', { name: 'Bips avant fin : Non' })).toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole('button', { name: 'Décompte départ : 5 s' }));
+    fireEvent.keyDown(await screen.findByRole('spinbutton', { name: 'Décompte départ' }), { key: 'ArrowDown' });
+    await userEvent.click(screen.getByRole('button', { name: 'Valider' }));
+    expect(screen.getByTestId('total')).toHaveTextContent('0:06');
+  });
+
+  it('previews the end-of-step beeps with the current setting', async () => {
+    renderEditor();
+    await userEvent.click(screen.getByRole('button', { name: 'Écouter les bips' }));
+    expect(beeper.schedule).toHaveBeenLastCalledWith(beepPlan(5, 5));
+
+    await userEvent.click(screen.getByRole('button', { name: 'Bips avant fin : 5 s' }));
+    fireEvent.keyDown(await screen.findByRole('spinbutton', { name: 'Bips avant fin' }), { key: 'ArrowUp' });
+    await userEvent.click(screen.getByRole('button', { name: 'Écouter' }));
+    expect(beeper.schedule).toHaveBeenLastCalledWith(beepPlan(4, 4));
   });
 
   it('autosaves changes (debounced), without any save button', async () => {
